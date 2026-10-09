@@ -195,7 +195,8 @@ function animarHero() {
   const entrada = gsap.timeline({ defaults: { ease: "power4.out" } });
   entrada
     .from(".hero__sol", { scale: 0.4, opacity: 0, duration: 1.2 })
-    .from(".hero .palabra", { yPercent: 115, rotate: 6, duration: 1, stagger: 0.12 }, 0.15)
+    .from(".hero__logo", { scale: 0, rotate: -200, duration: 1.1, ease: "back.out(1.5)" }, 0.1)
+    .from(".hero .palabra", { yPercent: 115, rotate: 6, duration: 1, stagger: 0.12 }, 0.35)
     .from(".flota", { scale: 0, rotate: -90, opacity: 0, duration: 0.9, stagger: 0.08, ease: "back.out(1.6)" }, 0.4)
     .from(".hero__sobre, .hero__lema, .hero__acciones > *", { y: 24, opacity: 0, duration: 0.7, stagger: 0.08 }, 0.7)
     .from(".hero__sello", { scale: 0, rotate: -120, duration: 0.8, ease: "back.out(1.8)" }, 0.9)
@@ -211,6 +212,7 @@ function animarHero() {
     });
   });
   gsap.to(".hero__texto", { yPercent: 28, opacity: 0.2, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
+  gsap.to(".hero__logo img", { rotate: 25, scale: 0.7, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
   gsap.to(".hero__sol", { scale: 1.5, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
 
   // Las piezas se apartan un poco del cursor.
