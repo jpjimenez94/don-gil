@@ -1,5 +1,5 @@
 import { responder } from "../lib/agent.js";
-import { buscarPedido, registrarEvento } from "../lib/store.js";
+import { buscarPedido, registrarEvento, registrarConversacion } from "../lib/store.js";
 
 const CANAL = "Demo web";
 
@@ -19,10 +19,13 @@ export default async function handler(req, res) {
     return res.status(503).json({ error: "Falta configurar ANTHROPIC_API_KEY en el servidor." });
   }
 
+  // Cada navegador se identifica con un código al azar: sirve para contar conversaciones, no para saber quién es.
+  const cliente = String(req.body?.cliente || "Visitante").slice(0, 40);
   registrarEvento("mensaje", CANAL);
+  registrarConversacion(`web:${cliente}`);
 
   try {
-    const { texto, pedido, aviso } = await responder(historial, { canal: CANAL, cliente: req.body?.cliente || "Visitante" });
+    const { texto, pedido, aviso } = await responder(historial, { canal: CANAL, cliente });
 
     // La conversación queda guardada con el pedido para que la sede la vea en el panel.
     const conversacion = [...historial.map(({ role, content }) => ({ role, content })), { role: "assistant", content: texto }];

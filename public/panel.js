@@ -188,6 +188,20 @@ function columnas(id, valores, etiquetas) {
 function pintarInteres() {
   const a = datos.analitica;
   if (!a || !menu) return;
+
+  // Consumo del plan: bolsa compartida entre todas las sedes.
+  const { usadas, tope } = a.consumo;
+  const porcentaje = tope ? Math.round((usadas / tope) * 100) : 0;
+  const miles = (n) => n.toLocaleString("es-CO");
+  $("consumo-cifra").textContent = `${miles(usadas)} de ${miles(tope)}`;
+  $("consumo-barra").style.width = `${Math.min(100, porcentaje)}%`;
+  $("consumo").classList.toggle("is-alerta", porcentaje >= 80);
+  $("consumo-nota").textContent =
+    porcentaje >= 100
+      ? "Se superó la bolsa del mes. Las conversaciones adicionales se cobran por bloque de 1.000."
+      : porcentaje >= 80
+        ? `Va en el ${porcentaje} % de la bolsa del mes. Si se supera, las adicionales se cobran por bloque de 1.000.`
+        : `Va en el ${porcentaje} % de la bolsa del mes, compartida entre todas las sedes. Una conversación es un cliente en un mismo día.`;
   const nombreSede = (id) => menu.sedes.find((s) => s.id === id)?.nombre ?? id;
   const nombreProducto = (id) => menu.productos.find((p) => p.id === id)?.nombre ?? id;
   const nombreCategoria = (id) => menu.categorias.find((c) => c.id === id)?.nombre ?? id;

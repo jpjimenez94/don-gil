@@ -222,3 +222,12 @@ h2 { font-family: var(--display); font-weight: 400; font-size: 1.2rem; color: va
 .interruptor--todos { border-bottom: 2px solid var(--vino); padding-bottom: 0.7rem; margin-bottom: 0.2rem; }
 .interruptor--todos strong { font-family: var(--display); font-weight: 400; font-size: 1.2rem; color: var(--vino); display: block; }
 .interruptor--todos small { font-size: 0.8rem; opacity: 0.7; }
+
+/* Consumo del plan */
+.consumo { display: grid; gap: 0.6rem; }
+.consumo__cabeza { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
+.consumo__cabeza strong { font-family: var(--display); font-weight: 400; font-size: 1.5rem; color: var(--vino); font-variant-numeric: tabular-nums; }
+.consumo__pista { height: 14px; border-radius: 999px; background: rgba(91, 29, 20, 0.08); overflow: hidden; }
+.consumo__pista i { display: block; height: 100%; min-width: 4px; border-radius: 999px; background: var(--verde); transition: width 0.5s ease; }
+.consumo.is-alerta { border: 2px solid #b3321f; }
+.consumo.is-alerta .consumo__pista i { background: #b3321f; }

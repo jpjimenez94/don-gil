@@ -14,6 +14,9 @@
   const EN_LINEA = "Asistente de pedidos · en línea";
   const CONSULTA_ESTADO_MS = 4000;
 
+  // Código al azar de esta visita, para que el panel cuente conversaciones distintas.
+  const visitante = `Visitante ${Math.random().toString(36).slice(2, 7)}`;
+
   const historial = [];
   const misPedidos = new Map(); // número de pedido -> último estado que el cliente ya vio
   const misAvisos = new Set(); // avisos pasados a una persona en esta conversación
@@ -115,7 +118,7 @@
       const respuesta = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mensajes: historial, pedidos: [...misPedidos.keys()] }),
+        body: JSON.stringify({ mensajes: historial, pedidos: [...misPedidos.keys()], cliente: visitante }),
       });
       const datos = await respuesta.json();
       if (!respuesta.ok) throw new Error(datos.error || "Error");
