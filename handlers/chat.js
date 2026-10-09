@@ -1,5 +1,5 @@
 import { responder } from "../lib/agent.js";
-import { buscarPedido, registrarEvento, registrarConversacion } from "../lib/store.js";
+import { store, buscarPedido, registrarEvento, registrarConversacion, mensajeAgenteApagado } from "../lib/store.js";
 
 const CANAL = "Demo web";
 
@@ -14,6 +14,8 @@ export default async function handler(req, res) {
     historial.every((m) => (m.role === "user" || m.role === "assistant") && typeof m.content === "string" && m.content.length <= 2000) &&
     historial.at(-1).role === "user";
   if (!valido) return res.status(400).json({ error: "Conversación no válida" });
+
+  if (!store.agenteActivo) return res.status(200).json({ respuesta: mensajeAgenteApagado(), pedido: null, aviso: null });
 
   if (!process.env.ANTHROPIC_API_KEY && !process.env.ANTHROPIC_AUTH_TOKEN) {
     return res.status(503).json({ error: "Falta configurar ANTHROPIC_API_KEY en el servidor." });

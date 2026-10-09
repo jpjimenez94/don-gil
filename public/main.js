@@ -326,6 +326,12 @@ async function iniciar() {
   estado.menu = await fetch("/api/menu").then((r) => r.json());
   estado.sede = estado.menu.sedes[0];
   window.donGilWhatsApp = estado.menu.marca.whatsapp_pedidos;
+  window.donGilAgenteActivo = estado.menu.agenteActivo !== false;
+  // WhatsApp de la sede elegida; si esa sede no tiene, el de la primera que sí tenga.
+  window.donGilWhatsAppDeSede = () => {
+    const numero = estado.sede.whatsapp ?? estado.menu.sedes.find((s) => s.whatsapp)?.whatsapp;
+    return numero ? `57${numero}` : null;
+  };
   pintarControles();
   pintarGrilla(false);
   pintarAntojos();

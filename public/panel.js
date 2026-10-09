@@ -21,7 +21,7 @@ const filtro = $("filtro");
 const botonSonido = $("sonido");
 const dialogo = $("conversacion");
 const dialogoCancelar = $("cancelar");
-let datos = { pedidos: [], avisos: [], sedes: [], analitica: null };
+let datos = { pedidos: [], avisos: [], sedes: [], agenteActivo: true, analitica: null };
 let menu = null;
 let conocidos = null; // números de pedido ya vistos; null hasta la primera carga
 let audio = null;
@@ -235,14 +235,25 @@ function pintarCarta() {
   if (!menu || !datos.sedes.length) return;
   const sede = sedeElegida();
   const pausadas = datos.sedes.filter((s) => !s.abierta).length;
-  const novedades = datos.sedes.reduce((n, s) => n + s.agotados.length, 0) + pausadas;
+  const novedades = datos.sedes.reduce((n, s) => n + s.agotados.length, 0) + pausadas + (datos.agenteActivo === false ? 1 : 0);
   $("t-agotados").textContent = novedades;
   $("t-agotados").hidden = novedades === 0;
 
   if (!sede) {
     const desde = (s) => Math.min(...s.domicilio.map((z) => z.precio));
     const pedidosDe = (s) => datos.pedidos.filter((p) => p.sede === s.nombre && !CERRADOS.includes(p.estado)).length;
+    const activo = datos.agenteActivo !== false;
     $("carta").innerHTML = `
+      <section class="tarjeta sede-estado${activo ? "" : " is-pausada"}">
+        <div>
+          <h2>Asistente de pedidos</h2>
+          <p>${activo ? "Encendido. Contesta el WhatsApp y el chat de la página, y registra los pedidos en este panel." : "Apagado. Los botones de la página abren el WhatsApp de cada sede, y a quien le escriba al asistente se le responde con esos números. No se registran pedidos nuevos en el panel."}</p>
+        </div>
+        <label class="interruptor interruptor--grande">
+          <span>${activo ? "Encendido" : "Apagado"}</span>
+          <input type="checkbox" id="agente-activo" ${activo ? "checked" : ""} aria-label="Asistente de pedidos encendido">
+        </label>
+      </section>
       <p class="nota">Toque una sede para ver y cambiar su horario, sus tarifas de domicilio y lo que tiene disponible.</p>
       <div class="sedes-lista">
         ${datos.sedes
@@ -441,6 +452,11 @@ $("fichas").addEventListener("click", (evento) => {
 });
 
 $("carta").addEventListener("change", async (evento) => {
+  if (evento.target.id === "agente-activo") {
+    await enviar({ agente: evento.target.checked });
+    pintarCarta();
+    return;
+  }
   const sede = sedeElegida();
   if (!sede) return;
   const casilla = evento.target;

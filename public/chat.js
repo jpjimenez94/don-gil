@@ -77,6 +77,15 @@
   const esCelular = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
   function abrir(mensaje) {
+    // Asistente apagado: el cliente escribe directo al WhatsApp de la sede, desde celular o computador.
+    if (window.donGilAgenteActivo === false) {
+      const deSede = window.donGilWhatsAppDeSede?.();
+      if (deSede) {
+        const texto = encodeURIComponent(mensaje || "Hola, quiero hacer un pedido");
+        window.location.href = `https://wa.me/${deSede}?text=${texto}`;
+        return;
+      }
+    }
     const numero = window.donGilWhatsApp;
     if (numero && esCelular) {
       window.registrarEvento?.("chat_abierto");
