@@ -9,7 +9,7 @@ export const rutas = { chat, orders, menu, whatsapp };
 
 export default function handler(req, res) {
   // En Vercel la reescritura cambia req.url a /api/index, así que la ruta original llega en ?ruta=.
-  const deUrl = new URL(req.url, "http://localhost").pathname.replace(/^/api//, "").replace(//$/, "");
+  const deUrl = new URL(req.url, "http://localhost").pathname.replace(/^\/api\//, "").replace(/\/$/, "");
   const nombre = [req.query?.ruta ?? deUrl].flat().join("/");
   const ruta = rutas[nombre];
   if (!ruta) return res.status(404).json({ error: "No encontrado" });
