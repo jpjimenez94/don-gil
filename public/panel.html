@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Don Gil · Panel de sede</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="img/logo.webp">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Lilita+One&family=Yellowtail&display=swap" rel="stylesheet">
+  <style>
+    :root { --amarillo: #ffcf1f; --crema: #fff6dc; --vino: #5b1d14; --naranja: #e9772b; }
+    * { box-sizing: border-box; margin: 0; }
+    body { font-family: "DM Sans", system-ui, sans-serif; background: var(--crema); color: #2a120d; min-height: 100vh; }
+    .barra { background: var(--vino); color: var(--crema); padding: 1rem clamp(1rem, 4vw, 2rem); display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; position: sticky; top: 0; z-index: 2; }
+    .barra a { font-family: "Yellowtail", cursive; font-size: 2rem; color: var(--amarillo); text-decoration: none; line-height: 1; }
+    .barra h1 { font-family: "Lilita One", sans-serif; font-weight: 400; font-size: 1.2rem; flex: 1; }
+    select { font: inherit; padding: 0.5rem 0.8rem; border-radius: 999px; border: 0; }
+    .vivo { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; }
+    .vivo i { width: 9px; height: 9px; border-radius: 50%; background: #4ade80; animation: late 1.4s infinite; }
+    @keyframes late { 50% { opacity: 0.3; } }
+    main { padding: clamp(1rem, 4vw, 2rem); max-width: 1100px; margin: 0 auto; }
+    h2 { font-family: "Lilita One", sans-serif; font-weight: 400; color: var(--vino); margin: 1.5rem 0 0.8rem; }
+    .lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 1rem; }
+    .pedido { background: #fff; border-radius: 18px; padding: 1.1rem; border-left: 8px solid var(--amarillo); animation: entra 0.5s ease; }
+    .pedido.aviso { border-left-color: var(--naranja); }
+    @keyframes entra { from { transform: translateY(16px); opacity: 0; } }
+    .pedido__cabeza { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; }
+    .pedido strong { font-family: "Lilita One", sans-serif; font-weight: 400; font-size: 1.3rem; color: var(--vino); }
+    .pedido small { opacity: 0.6; }
+    .chip { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 999px; background: var(--amarillo); font-size: 0.75rem; font-weight: 700; margin: 0.5rem 0.3rem 0 0; }
+    ul { list-style: none; padding: 0; margin: 0.7rem 0; border-top: 1px dashed #ccc; }
+    li { display: flex; justify-content: space-between; padding: 0.35rem 0; border-bottom: 1px dashed #ccc; }
+    .total { display: flex; justify-content: space-between; font-weight: 700; font-size: 1.1rem; }
+    .dato { font-size: 0.9rem; margin-top: 0.3rem; }
+    .vacio { opacity: 0.6; padding: 2rem 0; }
+  </style>
+</head>
+<body>
+  <header class="barra">
+    <a href="/">Don Gil</a>
+    <h1>Panel de sede</h1>
+    <span class="vivo"><i></i>En vivo</span>
+    <select id="filtro" aria-label="Sede"><option value="">Todas las sedes</option></select>
+  </header>
+  <main>
+    <h2>Pedidos</h2>
+    <div class="lista" id="pedidos"></div>
+    <h2>Avisos para el equipo</h2>
+    <div class="lista" id="avisos"></div>
+  </main>
+  <script>
+    const pesos = (n) => "$" + n.toLocaleString("es-CO");
+    const hora = (iso) => new Date(iso).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" });
+    const filtro = document.getElementById("filtro");
+    const ESCAPES = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" };
+    const esc = (texto) => String(texto ?? "").replace(/[&<>"]/g, (c) => ESCAPES[c]);
+    const SIN_PEDIDOS = `<p class="vacio">Aún no hay pedidos. Haga uno desde el chat de la página.</p>`;
+    const SIN_AVISOS = `<p class="vacio">Sin avisos.</p>`;
+    let firma = "";
+
+    fetch("/api/menu").then((r) => r.json()).then((menu) => {
+      for (const sede of menu.sedes) filtro.add(new Option(sede.nombre, sede.nombre));
+    });
+    filtro.addEventListener("change", () => { firma = ""; cargar(); });
+
+    function tarjetaPedido(p) {
+      return `
+        <article class="pedido">
+          <div class="pedido__cabeza"><strong>${esc(p.numero)}</strong><small>${hora(p.creado)} · ${esc(p.canal)}</small></div>
+          <span class="chip">${esc(p.sede)}</span><span class="chip">${p.entrega === "domicilio" ? "Domicilio" : "Recoger"}</span><span class="chip">${esc(p.hora)}</span>
+          <ul>${p.lineas.map((l) => `<li><span>${l.cantidad} x ${esc(l.producto)}</span><span>${pesos(l.subtotal)}</span></li>`).join("")}</ul>
+          <div class="total"><span>Total · ${esc(p.pago)}</span><span>${pesos(p.total)}</span></div>
+          <p class="dato"><b>Recibe:</b> ${esc(p.nombre)}</p>
+          ${p.direccion ? `<p class="dato"><b>Dirección:</b> ${esc(p.direccion)}</p>` : ""}
+          ${p.notas ? `<p class="dato"><b>Notas:</b> ${esc(p.notas)}</p>` : ""}
+        </article>`;
+    }
+
+    function tarjetaAviso(a) {
+      return `
+        <article class="pedido aviso">
+          <div class="pedido__cabeza"><strong>Atender</strong><small>${hora(a.creado)} · ${esc(a.canal)}</small></div>
+          <span class="chip">${esc(a.sede)}</span>
+          <p class="dato">${esc(a.motivo)}</p>
+          <p class="dato"><b>Cliente:</b> ${esc(a.cliente)}</p>
+        </article>`;
+    }
+
+    async function cargar() {
+      const { pedidos, avisos } = await fetch("/api/orders").then((r) => r.json());
+      const nueva = JSON.stringify([pedidos.length, avisos.length, filtro.value]);
+      if (nueva === firma) return;
+      firma = nueva;
+      const sede = filtro.value;
+      const misPedidos = pedidos.filter((p) => !sede || p.sede === sede);
+      const misAvisos = avisos.filter((a) => !sede || a.sede === sede || a.sede === "Sin definir");
+      document.getElementById("pedidos").innerHTML = misPedidos.map(tarjetaPedido).join("") || SIN_PEDIDOS;
+      document.getElementById("avisos").innerHTML = misAvisos.map(tarjetaAviso).join("") || SIN_AVISOS;
+    }
+    cargar();
+    setInterval(cargar, 3000);
+  </script>
+</body>
+</html>

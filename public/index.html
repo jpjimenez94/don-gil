@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Don Gil · Empanaditas y Buñuelitos</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="img/logo.webp">
+  <meta name="description" content="50 años con la tradición de Papá. Empanaditas, buñuelos y aborrajados en Cali y Jamundí. Pida su domi por WhatsApp.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Lilita+One&family=Yellowtail&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="nav" id="nav">
+    <a class="logo-img" href="#inicio" aria-label="Don Gil, inicio"><img src="img/logo.webp" alt="Don Gil, Tienda de Papá" width="64" height="64"></a>
+    <nav class="nav__links" aria-label="Principal">
+      <a href="#menu">Menú</a>
+      <a href="#antojos">Antojos</a>
+      <a href="#historia">Historia</a>
+      <a href="#sedes">Sedes</a>
+    </nav>
+    <button class="btn btn--dark" data-abrir-chat>Pedir domi</button>
+  </header>
+
+  <main>
+    <section class="hero" id="inicio">
+      <div class="hero__sol" aria-hidden="true"></div>
+      <div class="hero__flotantes" aria-hidden="true">
+        <span class="flota flota--1" data-arte="empanada" data-vel="-28"></span>
+        <span class="flota flota--2" data-arte="bunuelo" data-vel="-55"></span>
+        <span class="flota flota--3" data-arte="empanada" data-vel="-70"></span>
+        <span class="flota flota--4" data-arte="aborrajado" data-vel="-40"></span>
+        <span class="flota flota--5" data-arte="bunuelo" data-vel="-90"></span>
+      </div>
+      <div class="hero__texto">
+        <p class="hero__sobre">Cali · Jamundí · desde hace 50 años</p>
+        <h1 class="hero__titulo" aria-label="Empanaditas y buñuelitos">
+          <span class="linea"><span class="palabra">Empanaditas</span></span>
+          <span class="linea linea--script"><span class="palabra">y</span></span>
+          <span class="linea"><span class="palabra">Buñuelitos</span></span>
+        </h1>
+        <p class="hero__lema">50 años con la tradición de Papá.</p>
+        <div class="hero__acciones">
+          <button class="btn btn--dark btn--grande" data-abrir-chat>Pida su domi</button>
+          <a class="btn btn--linea btn--grande" href="#menu">Ver el menú</a>
+        </div>
+      </div>
+      <div class="hero__sello" aria-hidden="true">
+        <svg viewBox="0 0 200 200"><defs><path id="circulo" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/></defs><text><textPath href="#circulo">PA' MÍ · PA' TI · PA' TODOS · PA' MÍ · PA' TI · PA' TODOS ·</textPath></text></svg>
+        <strong>$1.000</strong><small>la empanada</small>
+      </div>
+    </section>
+
+    <div class="cinta" aria-hidden="true">
+      <div class="cinta__pista">
+        <span>Crocanticas</span><i></i><span>Bien cargaditas</span><i></i><span>Con ají o con ají</span><i></i><span>Pa' que llegue pues</span><i></i>
+        <span>Crocanticas</span><i></i><span>Bien cargaditas</span><i></i><span>Con ají o con ají</span><i></i><span>Pa' que llegue pues</span><i></i>
+      </div>
+    </div>
+
+    <section class="seccion menu" id="menu">
+      <div class="seccion__cabeza">
+        <p class="etiqueta">El menú</p>
+        <h2 class="titulo"><span class="revela">Escoja su sede</span> <span class="revela">y antójese.</span></h2>
+        <p class="bajada">Cada sede tiene su lista de precios. Escoja la suya y vea lo que le toca, sin sorpresas.</p>
+      </div>
+      <div class="menu__controles">
+        <div class="sedes-tabs" id="sedes-tabs" role="tablist" aria-label="Sede"></div>
+        <div class="cats" id="cats" role="tablist" aria-label="Categoría"></div>
+      </div>
+      <p class="menu__sede" id="menu-sede" aria-live="polite"></p>
+      <div class="grilla" id="grilla"></div>
+    </section>
+
+    <section class="antojos" id="antojos" aria-label="Los más pedidos">
+      <div class="antojos__pista" id="antojos-pista">
+        <div class="antojos__intro">
+          <p class="etiqueta etiqueta--clara">Los más pedidos</p>
+          <h2 class="titulo titulo--claro">Lo que se va<br>volando.</h2>
+          <p class="bajada bajada--clara">Deslice y escoja. Los precios son de la sede que eligió arriba.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="seccion historia" id="historia">
+      <p class="etiqueta">La historia</p>
+      <p class="historia__texto" id="historia-texto">Don Gil nació de una receta de Papá que lleva cincuenta años pasando de mano en mano. Hoy la fritamos todos los días en Cali y Jamundí, igualita: masa crocante, guiso generoso y ají al lado.</p>
+      <div class="cifras">
+        <div class="cifra"><strong data-cuenta="50">0</strong><span>años de receta</span></div>
+        <div class="cifra"><strong data-cuenta="5">0</strong><span>sedes</span></div>
+        <div class="cifra"><strong data-cuenta="65">0</strong><span>empanadas por kilo</span></div>
+      </div>
+      <div class="apoyo">
+        <div class="apoyo__arte" data-arte="caja" aria-hidden="true"></div>
+        <div>
+          <h3>Cuando a un emprendedor le va bien, ganamos todos.</h3>
+          <p>Don Gil entrega equipos a emprendedores que quieren sacar adelante su negocio. Lo hacemos de corazón.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="seccion sedes" id="sedes">
+      <div class="seccion__cabeza">
+        <p class="etiqueta">Sedes</p>
+        <h2 class="titulo"><span class="revela">Pase por la suya</span> <span class="revela">o se lo llevamos.</span></h2>
+      </div>
+      <div class="sedes__lista" id="sedes-lista"></div>
+    </section>
+
+    <section class="kilo" id="kilo">
+      <div class="kilo__arte" data-arte="caja" aria-hidden="true"></div>
+      <div class="kilo__texto">
+        <p class="etiqueta etiqueta--clara">Por kilo y eventos</p>
+        <h2 class="titulo titulo--claro">Un kilito pa' la reunión.</h2>
+        <p class="bajada bajada--clara">65 empanadas recién hechas. Dígale al asistente cuántos kilos y a qué hora, y se lo tenemos listo.</p>
+        <button class="btn btn--amarillo btn--grande" data-abrir-chat data-mensaje="Hola, quiero cotizar empanadas por kilo">Cotizar por kilo</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pie">
+    <a class="logo-img logo-img--pie" href="#inicio"><img src="img/logo.webp" alt="Don Gil, Tienda de Papá" width="120" height="120"></a>
+    <p>Empanaditas y Buñuelitos · Cali y Jamundí · Pago contra entrega</p>
+    <p class="pie__nota">Propuesta de diseño. Ilustraciones provisionales.</p>
+    <div class="pie__redes">
+      <a href="https://www.instagram.com/dongilempanaditasybunuelitos/" target="_blank" rel="noopener">Instagram</a>
+      <a href="https://www.tiktok.com/@dongilempanaditas" target="_blank" rel="noopener">TikTok</a>
+      <a href="panel.html">Panel de sede</a>
+    </div>
+  </footer>
+
+  <button class="burbuja" id="burbuja" data-abrir-chat aria-label="Abrir chat de pedidos">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3C8.8 3 3 8.6 3 15.5c0 2.5.8 4.9 2.200 6.900L3.500 29l6.900-1.800c1.700.8 3.600 1.300 5.600 1.300 7.200 0 13-5.600 13-12.500S23.200 3 16 3z" fill="currentColor"/></svg>
+    <span>Pida su domi</span>
+  </button>
+
+  <aside class="chat" id="chat" aria-label="Chat de pedidos" aria-hidden="true">
+    <header class="chat__cabeza">
+      <img class="chat__avatar" src="img/logo.webp" alt="" width="40" height="40">
+      <div>
+        <strong>Don Gil</strong>
+        <small id="chat-estado">Asistente de pedidos · en línea</small>
+      </div>
+      <button class="chat__cerrar" id="chat-cerrar" aria-label="Cerrar chat">×</button>
+    </header>
+    <div class="chat__mensajes" id="chat-mensajes" aria-live="polite"></div>
+    <div class="chat__sugerencias" id="chat-sugerencias">
+      <button type="button">Quiero un Combo Don Gil</button>
+      <button type="button">¿Hasta qué hora abren?</button>
+      <button type="button">Un kilo para recoger</button>
+    </div>
+    <form class="chat__form" id="chat-form">
+      <input id="chat-entrada" type="text" autocomplete="off" placeholder="Escriba su pedido" aria-label="Mensaje" maxlength="500">
+      <button type="submit" aria-label="Enviar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20.500 21 12 3 3.500v6.600l11 1.900-11 1.900z" fill="currentColor"/></svg></button>
+    </form>
+  </aside>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
+  <script src="arte.js"></script>
+  <script src="main.js"></script>
+  <script src="chat.js"></script>
+</body>
+</html>
