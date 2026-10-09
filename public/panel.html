@@ -18,18 +18,17 @@
       <h1>Panel de sede</h1>
       <span class="vivo" id="vivo"><i></i><span id="vivo-texto">En vivo</span></span>
     </div>
-    <label class="campo">
-      <span>Sede</span>
-      <select id="filtro"><option value="">Todas</option></select>
-    </label>
+    <select id="filtro" hidden aria-hidden="true"><option value="">Todas</option></select>
     <button class="sonido" id="sonido" type="button" aria-pressed="false">Sonido: apagado</button>
   </header>
 
   <nav class="pestanas" role="tablist" aria-label="Secciones del panel">
     <button role="tab" aria-selected="true" data-vista="pedidos">Pedidos <span class="cuenta" id="t-pedidos">0</span></button>
     <button role="tab" aria-selected="false" data-vista="resumen">Resumen</button>
-    <button role="tab" aria-selected="false" data-vista="carta">Mi sede <span class="cuenta" id="t-agotados" hidden>0</span></button>
+    <button role="tab" aria-selected="false" data-vista="carta">Sedes <span class="cuenta" id="t-agotados" hidden>0</span></button>
   </nav>
+
+  <div class="fichas" id="fichas" role="group" aria-label="Ver una sede o todas"></div>
 
   <main>
     <!-- Pedidos -->

@@ -29,15 +29,6 @@ let abierta = null; // conversación abierta: { numero } o { aviso }
 let porCancelar = null;
 let avisoGuardado = { texto: "", hasta: 0 }; // confirmación de "Mi sede", visible unos segundos
 
-function recordar(clave, valor) {
-  try {
-    if (valor === undefined) return localStorage.getItem(clave);
-    localStorage.setItem(clave, valor);
-  } catch {
-    return null;
-  }
-}
-
 function haceCuanto(iso) {
   const minutos = Math.floor((Date.now() - new Date(iso)) / 60000);
   if (minutos < 1) return "ahora";
@@ -223,26 +214,38 @@ function pintarInteres() {
 
 /* ---------- Mi sede: información y disponibilidad ---------- */
 
-const sedeElegida = () => datos.sedes.find((s) => s.nombre === filtro.value);
+let sedeEnEdicion = null; // id de la sede abierta en la pestaña Sedes; null = lista de todas
+const sedeElegida = () => datos.sedes.find((s) => s.id === sedeEnEdicion);
 
 function pintarCarta() {
   if (!menu || !datos.sedes.length) return;
   const sede = sedeElegida();
   const pausadas = datos.sedes.filter((s) => !s.abierta).length;
-  const novedades = sede ? sede.agotados.length + (sede.abierta ? 0 : 1) : datos.sedes.reduce((n, s) => n + s.agotados.length, 0) + pausadas;
+  const novedades = datos.sedes.reduce((n, s) => n + s.agotados.length, 0) + pausadas;
   $("t-agotados").textContent = novedades;
   $("t-agotados").hidden = novedades === 0;
 
   if (!sede) {
+    const desde = (s) => Math.min(...s.domicilio.map((z) => z.precio));
+    const pedidosDe = (s) => datos.pedidos.filter((p) => p.sede === s.nombre && !CERRADOS.includes(p.estado)).length;
     $("carta").innerHTML = `
-      <p class="nota">Cada sede maneja su horario, sus tarifas de domicilio y lo que tiene disponible. Escoja una para verla y configurarla.</p>
+      <p class="nota">Toque una sede para ver y cambiar su horario, sus tarifas de domicilio y lo que tiene disponible.</p>
       <div class="sedes-lista">
         ${datos.sedes
           .map((s) => `
-            <button class="sede-boton" type="button" data-elegir-sede="${esc(s.nombre)}">
-              <strong>${esc(s.nombre)}</strong>
+            <button class="sede-boton${s.abierta ? "" : " is-pausada"}" type="button" data-editar-sede="${esc(s.id)}">
+              <span class="sede-boton__cabeza">
+                <strong>${esc(s.nombre)}</strong>
+                <span class="pildora${s.abierta ? "" : " is-pausada"}">${s.abierta ? "Abierta" : "En pausa"}</span>
+              </span>
+              <span>${esc(s.direccion)}</span>
               <span>${esc(s.horario)}</span>
-              <span class="sede-boton__estado${s.abierta ? "" : " is-pausada"}">${s.abierta ? "Recibiendo pedidos" : "En pausa"}${s.agotados.length ? ` · ${s.agotados.length} agotado${s.agotados.length === 1 ? "" : "s"}` : ""}</span>
+              <span class="sede-boton__datos">
+                <span>Domicilio desde ${pesos(desde(s))}</span>
+                <span>${pedidosDe(s)} en curso</span>
+                <span class="${s.agotados.length ? "is-alerta" : ""}">${s.agotados.length} agotado${s.agotados.length === 1 ? "" : "s"}</span>
+              </span>
+              <span class="sede-boton__ir">Configurar →</span>
             </button>`)
           .join("")}
       </div>`;
@@ -262,6 +265,7 @@ function pintarCarta() {
       .join("");
 
   $("carta").innerHTML = `
+    <button class="volver" type="button" data-volver>← Todas las sedes</button>
     <section class="tarjeta sede-estado${sede.abierta ? "" : " is-pausada"}">
       <div>
         <h2>${esc(sede.nombre)}</h2>
@@ -389,9 +393,24 @@ document.querySelector("main").addEventListener("click", (evento) => {
 });
 
 $("carta").addEventListener("click", (evento) => {
-  const boton = evento.target.closest("button[data-elegir-sede]");
+  const boton = evento.target.closest("button[data-editar-sede], button[data-volver]");
   if (!boton) return;
-  filtro.value = boton.dataset.elegirSede;
+  sedeEnEdicion = boton.dataset.editarSede ?? null;
+  avisoGuardado = { texto: "", hasta: 0 };
+  pintarCarta();
+  window.scrollTo({ top: 0 });
+});
+
+// Fichas para ver una sede o todas en Pedidos y Resumen.
+function pintarFichas() {
+  if (!menu) return;
+  const ficha = (valor, texto) => `<button type="button" class="ficha" data-sede="${esc(valor)}" aria-pressed="${filtro.value === valor}">${esc(texto)}</button>`;
+  $("fichas").innerHTML = ficha("", "Todas las sedes") + menu.sedes.map((s) => ficha(s.nombre, s.nombre)).join("");
+}
+$("fichas").addEventListener("click", (evento) => {
+  const boton = evento.target.closest("button[data-sede]");
+  if (!boton) return;
+  filtro.value = boton.dataset.sede;
   filtro.dispatchEvent(new Event("change"));
 });
 
@@ -443,6 +462,11 @@ document.querySelector(".pestanas").addEventListener("click", (evento) => {
   if (!pestana) return;
   for (const otra of document.querySelectorAll(".pestanas button")) otra.setAttribute("aria-selected", otra === pestana);
   for (const vista of document.querySelectorAll(".vista")) vista.hidden = vista.id !== `vista-${pestana.dataset.vista}`;
+  // Sedes siempre abre en la lista de todas; las fichas de filtro solo aplican a Pedidos y Resumen.
+  sedeEnEdicion = null;
+  $("fichas").hidden = pestana.dataset.vista === "carta";
+  pintarCarta();
+  window.scrollTo({ top: 0 });
 });
 
 botonSonido.addEventListener("click", () => {
@@ -460,7 +484,7 @@ botonSonido.addEventListener("click", () => {
 });
 
 filtro.addEventListener("change", () => {
-  recordar("don-gil-sede", filtro.value);
+  pintarFichas();
   pintar();
 });
 
@@ -469,7 +493,7 @@ fetch("/api/menu")
   .then((respuesta) => {
     menu = respuesta;
     for (const sede of menu.sedes) filtro.add(new Option(sede.nombre, sede.nombre));
-    filtro.value = recordar("don-gil-sede") ?? "";
+    pintarFichas();
     pintar();
   })
   .catch(() => {});

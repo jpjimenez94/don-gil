@@ -194,3 +194,26 @@ h2 { font-family: var(--display); font-weight: 400; font-size: 1.2rem; color: va
 .sede-form__pie { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
 .sede-form__pie .accion { width: auto; padding-inline: 1.6rem; }
 .interruptor em { font-style: normal; opacity: 0.6; font-size: 0.85rem; margin-left: 0.3rem; }
+
+/* Fichas de sede (Pedidos y Resumen) */
+.fichas { display: flex; gap: 0.4rem; padding: 0.7rem clamp(0.8rem, 3vw, 1.6rem) 0; max-width: 1400px; margin: 0 auto; overflow-x: auto; }
+.fichas[hidden] { display: none; }
+.ficha { padding: 0.4rem 0.9rem; border-radius: 999px; background: #fff; color: var(--vino); font-size: 0.88rem; font-weight: 500; white-space: nowrap; border: 2px solid transparent; }
+.ficha:hover { border-color: var(--vino); }
+.ficha[aria-pressed="true"] { background: var(--amarillo); font-weight: 700; border-color: var(--vino); }
+
+/* Lista de sedes y regreso */
+.sedes-lista { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+.sede-boton { padding: 1.1rem; gap: 0.35rem; border-top: 6px solid var(--verde); cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease; }
+.sede-boton.is-pausada { border-top-color: #b3321f; }
+.sede-boton:hover { transform: translateY(-3px); box-shadow: 0 14px 26px -18px rgba(58, 17, 11, 0.7); }
+.sede-boton__cabeza { display: flex; justify-content: space-between; align-items: center; gap: 0.6rem; opacity: 1 !important; }
+.sede-boton__cabeza strong { font-size: 1.4rem; }
+.pildora { font-size: 0.74rem !important; font-weight: 700; padding: 0.15rem 0.6rem; border-radius: 999px; background: #dff3e6; color: var(--verde); opacity: 1 !important; }
+.pildora.is-pausada { background: #fde3de; color: #b3321f; }
+.sede-boton__datos { display: flex; flex-wrap: wrap; gap: 0.3rem 0.9rem; margin-top: 0.4rem; padding-top: 0.5rem; border-top: 1px dashed #d8cdb6; font-size: 0.8rem !important; opacity: 1 !important; }
+.sede-boton__datos .is-alerta { color: #b3321f; font-weight: 700; }
+.sede-boton__ir { margin-top: 0.5rem; font-weight: 700; color: var(--vino); opacity: 1 !important; font-size: 0.95rem !important; }
+.volver { justify-self: start; background: #fff; color: var(--vino); font-weight: 700; padding: 0.55rem 1rem; border-radius: 999px; border: 2px solid var(--vino); }
+.volver:hover { background: var(--vino); color: var(--crema); }
+.sede-estado h2 { font-size: 1.6rem; }
