@@ -25,6 +25,10 @@ function leerCuerpo(req) {
     let datos = "";
     req.on("data", (trozo) => (datos += trozo));
     req.on("end", () => {
+      // Twilio envía formularios; el resto, JSON.
+      if (req.headers["content-type"]?.includes("application/x-www-form-urlencoded")) {
+        return resolve(Object.fromEntries(new URLSearchParams(datos)));
+      }
       try {
         resolve(datos ? JSON.parse(datos) : {});
       } catch {
