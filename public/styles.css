@@ -268,3 +268,8 @@ img.chat__avatar { object-fit: cover; }
 .antojo__arte--foto { margin-bottom: 1.2rem; }
 .antojo__arte--foto img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 1.4rem; display: block; box-shadow: 0 24px 30px -18px rgba(91, 29, 20, 0.55); }
 .kilo__arte img { width: 100%; max-width: 480px; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 2rem; display: block; margin: 0 auto; box-shadow: 0 34px 40px -20px rgba(58, 17, 11, 0.6); }
+
+/* Aviso de mensaje nuevo con el chat cerrado */
+.burbuja.is-aviso::after { content: ""; position: absolute; top: -2px; right: -2px; width: 16px; height: 16px; border-radius: 50%; background: #e23d28; border: 3px solid #fff; }
+.burbuja.is-aviso { animation: salta 1s ease 3; }
+@keyframes salta { 30% { transform: translateY(-8px); } 60% { transform: none; } }

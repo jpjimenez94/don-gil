@@ -48,7 +48,7 @@
         <div class="columna__lista" id="col-prep"></div>
       </div>
       <div class="columna" data-estado="Listo">
-        <h2>Listos <span class="cuenta" id="n-Listo">0</span></h2>
+        <h2>Listos y en camino <span class="cuenta" id="n-Listo">0</span></h2>
         <div class="columna__lista" id="col-Listo"></div>
       </div>
     </section>
@@ -58,6 +58,14 @@
       <div class="entregados__lista" id="col-Entregado"></div>
     </details>
   </main>
+
+  <dialog class="conv" id="conversacion" aria-labelledby="conv-titulo">
+    <header class="conv__cabeza">
+      <div><strong id="conv-titulo"></strong><small id="conv-subtitulo"></small></div>
+      <button type="button" id="conv-cerrar" aria-label="Cerrar">×</button>
+    </header>
+    <div class="conv__mensajes" id="conv-mensajes"></div>
+  </dialog>
 
   <script src="panel.js"></script>
 </body>

@@ -1,19 +1,10 @@
 import { responder } from "../lib/agent.js";
 import { store } from "../lib/store.js";
+import { enviarWhatsApp } from "../lib/whatsapp.js";
 
 // Webhook de WhatsApp Cloud API (Meta).
 // Variables: WHATSAPP_VERIFY_TOKEN, WHATSAPP_TOKEN, WHATSAPP_PHONE_NUMBER_ID.
-const GRAPH = "https://graph.facebook.com/v21.0";
 const MAX_TURNOS = 40;
-
-async function enviar(telefono, texto) {
-  const respuesta = await fetch(`${GRAPH}/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ messaging_product: "whatsapp", to: telefono, type: "text", text: { body: texto } }),
-  });
-  if (!respuesta.ok) console.error("whatsapp envío:", respuesta.status, await respuesta.text());
-}
 
 export default async function handler(req, res) {
   if (req.method === "GET") {
@@ -28,7 +19,7 @@ export default async function handler(req, res) {
 
   const telefono = mensaje.from;
   if (mensaje.type !== "text") {
-    await enviar(telefono, "Mijito, por acá solo le entiendo texto. Escríbame qué se le antoja y con gusto.");
+    await enviarWhatsApp(telefono, "Mijito, por acá solo le entiendo texto. Escríbame qué se le antoja y con gusto.");
     return res.status(200).send("ok");
   }
 
@@ -36,14 +27,18 @@ export default async function handler(req, res) {
   historial.push({ role: "user", content: mensaje.text.body.slice(0, 2000) });
 
   try {
-    const { texto } = await responder(historial, { canal: "WhatsApp", cliente: telefono });
+    const { texto, pedido, aviso } = await responder(historial, { canal: "WhatsApp", cliente: telefono });
     historial.push({ role: "assistant", content: texto });
-    store.conversaciones.set(telefono, historial.slice(-MAX_TURNOS));
-    await enviar(telefono, texto);
+    const reciente = historial.slice(-MAX_TURNOS);
+    store.conversaciones.set(telefono, reciente);
+    // La sede ve en el panel la conversación de cada pedido de este cliente.
+    for (const p of store.pedidos) if (p.canal === "WhatsApp" && p.cliente === telefono) p.conversacion = [...reciente];
+    if (aviso) aviso.conversacion = [...reciente];
+    await enviarWhatsApp(telefono, texto);
   } catch (error) {
     console.error("whatsapp:", error);
     historial.pop();
-    await enviar(telefono, "Qué pena, se nos enredó algo por acá. Escríbanos de nuevo en un momentico.");
+    await enviarWhatsApp(telefono, "Qué pena, se nos enredó algo por acá. Escríbanos de nuevo en un momentico.");
   }
   return res.status(200).send("ok");
 }

@@ -98,7 +98,8 @@ function pintarSedes() {
         <button class="btn btn--dark" type="button">Pedir aquí</button>`;
       $("h3", fila).textContent = s.nombre;
       $(".sede__dir", fila).textContent = s.direccion;
-      $(".sede__hora", fila).textContent = s.horario;
+      const tarifas = (s.domicilio ?? []).map((z) => z.precio);
+      $(".sede__hora", fila).textContent = tarifas.length ? `${s.horario} · Domicilio desde ${pesos(Math.min(...tarifas))}` : s.horario;
       $("button", fila).addEventListener("click", () => {
         elegirSede(s.id);
         window.abrirChat?.(`Hola, quiero pedir en la sede ${s.nombre}`);

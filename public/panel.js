@@ -1,10 +1,11 @@
 // Panel de sede: tablero de pedidos que se actualiza solo.
 const INTERVALO_MS = 3000;
 const MINUTOS_DEMORA = 10; // un pedido nuevo sin atender pasa a rojo
+// Cada botón mueve el pedido un paso y le avisa al cliente por el chat.
 const SIGUIENTE = {
-  "Nuevo": { estado: "En preparación", texto: "Empezar a preparar", clase: "" },
-  "En preparación": { estado: "Listo", texto: "Marcar listo", clase: "accion--listo" },
-  "Listo": { estado: "Entregado", texto: "Entregado", clase: "accion--suave" },
+  "Nuevo": () => ({ estado: "En preparación", texto: "Empezar a preparar", clase: "" }),
+  "En preparación": (p) => ({ estado: "Listo", texto: p.entrega === "domicilio" ? "Despachar domicilio" : "Listo para recoger", clase: "accion--listo" }),
+  "Listo": () => ({ estado: "Entregado", texto: "Marcar entregado", clase: "accion--suave" }),
 };
 const COLUMNAS = { "Nuevo": "col-Nuevo", "En preparación": "col-prep", "Listo": "col-Listo" };
 const CONTADORES = { "Nuevo": "n-Nuevo", "En preparación": "n-prep", "Listo": "n-Listo" };
@@ -53,7 +54,7 @@ function timbre() {
 }
 
 function tarjeta(pedido, esNuevo) {
-  const paso = SIGUIENTE[pedido.estado];
+  const paso = SIGUIENTE[pedido.estado](pedido);
   const demorado = pedido.estado === "Nuevo" && Date.now() - new Date(pedido.creado) > MINUTOS_DEMORA * 60000;
   return `
     <article class="pedido${esNuevo ? " is-nuevo" : ""}${demorado ? " is-demorado" : ""}">
@@ -68,10 +69,12 @@ function tarjeta(pedido, esNuevo) {
         <span class="chip">${esc(pedido.canal)}</span>
       </div>
       <ul>${pedido.lineas.map((l) => `<li><span><b>${l.cantidad}×</b>${esc(l.producto)}</span><span>${pesos(l.subtotal)}</span></li>`).join("")}</ul>
+      ${pedido.domicilio ? `<p class="dato dato--domi"><span><b>Domicilio:</b> ${esc(pedido.zona)}</span><span>${pesos(pedido.domicilio)}</span></p>` : ""}
       <div class="total"><span>${esc(pedido.pago)}</span><span>${pesos(pedido.total)}</span></div>
       <p class="dato"><b>Recibe:</b> ${esc(pedido.nombre)}</p>
       ${pedido.direccion ? `<p class="dato"><b>Dirección:</b> ${esc(pedido.direccion)}</p>` : ""}
       ${pedido.notas ? `<p class="dato"><b>Notas:</b> ${esc(pedido.notas)}</p>` : ""}
+      <button class="enlace" type="button" data-ver="${esc(pedido.numero)}">Ver conversación (${pedido.conversacion?.length ?? 0})</button>
       <button class="accion ${paso.clase}" type="button" data-numero="${esc(pedido.numero)}" data-estado="${esc(paso.estado)}">${paso.texto}</button>
     </article>`;
 }
@@ -92,7 +95,7 @@ function pintar(nuevos = new Set()) {
   $("n-Entregado").textContent = entregados.length;
   $("col-Entregado").innerHTML =
     entregados
-      .map((p) => `<div class="fila"><strong>${esc(p.numero)}</strong><span>${esc(p.nombre)} · ${p.lineas.map((l) => `${l.cantidad}× ${esc(l.producto)}`).join(", ")}</span><span class="fila__hora">${hora(p.creado)}</span><span>${pesos(p.total)}</span></div>`)
+      .map((p) => `<div class="fila"><button class="enlace" type="button" data-ver="${esc(p.numero)}"><strong>${esc(p.numero)}</strong></button><span>${esc(p.nombre)} · ${p.lineas.map((l) => `${l.cantidad}× ${esc(l.producto)}`).join(", ")}</span><span class="fila__hora">${hora(p.creado)}</span><span>${pesos(p.total)}</span></div>`)
       .join("") || `<p class="vacio">Aún no se ha entregado ningún pedido.</p>`;
 
   $("c-nuevos").textContent = pedidos.filter((p) => p.estado === "Nuevo").length;
@@ -107,6 +110,7 @@ function pintar(nuevos = new Set()) {
       <div class="aviso">
         <strong>${esc(a.motivo)}</strong>
         <small>${hora(a.creado)} · ${esc(a.sede)} · ${esc(a.canal)} · ${esc(a.cliente)}</small>
+        <button class="enlace" type="button" data-ver-aviso="${esc(a.id)}">Ver conversación (${a.conversacion?.length ?? 0})</button>
         <button class="accion accion--suave" type="button" data-aviso="${esc(a.id)}">Marcar atendido</button>
       </div>`)
     .join("");
@@ -146,7 +150,29 @@ async function enviar(cuerpo, boton) {
   await cargar();
 }
 
+const dialogo = $("conversacion");
+
+function verConversacion(titulo, subtitulo, conversacion = []) {
+  $("conv-titulo").textContent = titulo;
+  $("conv-subtitulo").textContent = subtitulo;
+  $("conv-mensajes").innerHTML =
+    conversacion.map((m) => `<div class="msg ${m.role === "user" ? "msg--cliente" : m.automatico ? "msg--sede" : "msg--agente"}">${m.automatico ? "<small>Aviso automático de la sede</small>" : ""}${esc(m.content)}</div>`).join("") ||
+    `<p class="vacio">Este pedido no tiene conversación guardada.</p>`;
+  dialogo.showModal();
+  $("conv-mensajes").scrollTop = 0;
+}
+$("conv-cerrar").addEventListener("click", () => dialogo.close());
+dialogo.addEventListener("click", (evento) => evento.target === dialogo && dialogo.close());
+
 document.querySelector("main").addEventListener("click", (evento) => {
+  const ver = evento.target.closest("button[data-ver], button[data-ver-aviso]");
+  if (ver) {
+    const pedido = datos.pedidos.find((p) => p.numero === ver.dataset.ver);
+    const aviso = datos.avisos.find((a) => a.id === ver.dataset.verAviso);
+    if (pedido) verConversacion(`Pedido ${pedido.numero}`, `${pedido.nombre} · ${pedido.sede} · ${pedido.canal}`, pedido.conversacion);
+    if (aviso) verConversacion("Aviso para el equipo", `${aviso.sede} · ${aviso.canal} · ${aviso.cliente}`, aviso.conversacion);
+    return;
+  }
   const boton = evento.target.closest("button[data-numero], button[data-aviso]");
   if (!boton) return;
   if (boton.dataset.aviso) enviar({ aviso: boton.dataset.aviso }, boton);

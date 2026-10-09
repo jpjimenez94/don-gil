@@ -14,7 +14,46 @@
       "direccion": "Calle 19 # 9a-50, Jamundí",
       "lista": "calle",
       "horario": "Lunes a domingo, 6:00 a. m. a 10:00 p. m.",
-      "whatsapp": "3028011131"
+      "whatsapp": "3028011131",
+      "domicilio": [
+        {
+          "id": "jamundi-cerca",
+          "nombre": "Centro de Jamundí",
+          "barrios": [
+            "Centro",
+            "Juan de Ampudia",
+            "La Pradera",
+            "El Rosario",
+            "Belalcázar",
+            "Libertadores"
+          ],
+          "precio": 3000
+        },
+        {
+          "id": "jamundi-media",
+          "nombre": "Jamundí urbano",
+          "barrios": [
+            "Alfaguara",
+            "Ciudad Sur",
+            "Terranova",
+            "Bonanza",
+            "El Castillo",
+            "Sachamate"
+          ],
+          "precio": 5000
+        },
+        {
+          "id": "jamundi-lejos",
+          "nombre": "Condominios y vía Cali",
+          "barrios": [
+            "Ciudad Country",
+            "Las Mercedes",
+            "Verde Alfaguara",
+            "Vía Cali-Jamundí"
+          ],
+          "precio": 7000
+        }
+      ]
     },
     {
       "id": "bochalema",
@@ -22,7 +61,43 @@
       "direccion": "Calle 48 # 106-137, local 7 y 8, Cali",
       "lista": "calle",
       "horario": "Lunes a domingo, 6:00 a. m. a 10:00 p. m.",
-      "whatsapp": "3026666700"
+      "whatsapp": "3026666700",
+      "domicilio": [
+        {
+          "id": "bochalema-cerca",
+          "nombre": "Bochalema y alrededores",
+          "barrios": [
+            "Bochalema",
+            "Valle del Lili",
+            "Ciudad Bochalema",
+            "Ciudad Meléndez"
+          ],
+          "precio": 3000
+        },
+        {
+          "id": "bochalema-media",
+          "nombre": "Sur de Cali",
+          "barrios": [
+            "El Caney",
+            "Ciudad Jardín",
+            "El Ingenio",
+            "Ciudad 2000",
+            "Mayapán"
+          ],
+          "precio": 5000
+        },
+        {
+          "id": "bochalema-lejos",
+          "nombre": "Pance y extremo sur",
+          "barrios": [
+            "Pance",
+            "La María",
+            "Ciudad Pacífica",
+            "Cañasgordas"
+          ],
+          "precio": 7000
+        }
+      ]
     },
     {
       "id": "san-nicolas",
@@ -30,7 +105,48 @@
       "direccion": "Cra. 5 # 16-03, San Nicolás, Cali",
       "lista": "calle",
       "horario": "Por confirmar",
-      "whatsapp": "3019495022"
+      "whatsapp": "3019495022",
+      "domicilio": [
+        {
+          "id": "san-nicolas-cerca",
+          "nombre": "Centro",
+          "barrios": [
+            "San Nicolás",
+            "El Calvario",
+            "San Pedro",
+            "La Merced",
+            "Santa Rosa",
+            "Obrero"
+          ],
+          "precio": 3000
+        },
+        {
+          "id": "san-nicolas-media",
+          "nombre": "Centro ampliado",
+          "barrios": [
+            "San Bosco",
+            "Alameda",
+            "Granada",
+            "Versalles",
+            "San Antonio",
+            "El Peñón",
+            "Jorge Isaacs"
+          ],
+          "precio": 5000
+        },
+        {
+          "id": "san-nicolas-lejos",
+          "nombre": "Norte y oeste cercanos",
+          "barrios": [
+            "Santa Mónica",
+            "San Vicente",
+            "Centenario",
+            "Salomia",
+            "Bellavista"
+          ],
+          "precio": 7000
+        }
+      ]
     },
     {
       "id": "palmetto",
@@ -38,7 +154,34 @@
       "direccion": "Centro comercial Palmetto Plaza, Cali",
       "lista": "cc",
       "horario": "Lunes a viernes, 6:00 a. m. a 9:00 p. m. Sábado y domingo, 8:00 a. m. a 9:00 p. m.",
-      "whatsapp": null
+      "whatsapp": null,
+      "domicilio": [
+        {
+          "id": "palmetto-cerca",
+          "nombre": "Alrededores de Palmetto",
+          "barrios": [
+            "Tequendama",
+            "El Lido",
+            "Champagnat",
+            "Eucarístico",
+            "Nueva Granada"
+          ],
+          "precio": 4000
+        },
+        {
+          "id": "palmetto-media",
+          "nombre": "Sur medio",
+          "barrios": [
+            "Limonar",
+            "Capri",
+            "Santa Anita",
+            "Pampalinda",
+            "Cuarto de Legua",
+            "El Refugio"
+          ],
+          "precio": 6000
+        }
+      ]
     },
     {
       "id": "san-fernando",
@@ -46,7 +189,33 @@
       "direccion": "Éxito San Fernando, Cali",
       "lista": "cc",
       "horario": "Por confirmar",
-      "whatsapp": null
+      "whatsapp": null,
+      "domicilio": [
+        {
+          "id": "san-fernando-cerca",
+          "nombre": "San Fernando y alrededores",
+          "barrios": [
+            "San Fernando",
+            "Miraflores",
+            "El Cedro",
+            "Tres de Julio",
+            "Santa Isabel"
+          ],
+          "precio": 4000
+        },
+        {
+          "id": "san-fernando-media",
+          "nombre": "Oeste y centro sur",
+          "barrios": [
+            "Bellavista",
+            "Los Cámbulos",
+            "Colseguros",
+            "Bretaña",
+            "El Templete"
+          ],
+          "precio": 6000
+        }
+      ]
     }
   ],
   "categorias": [
@@ -72,26 +241,257 @@
     }
   ],
   "productos": [
-    { "id": "empanada", "cat": "empanadas", "nombre": "Empanadita", "desc": "La de siempre: crocantica y bien cargadita.", "precio": {"calle": 1000, "cc": 1000}, "arte": "empanada", "foto": "img/empanada.webp" },
-    { "id": "empanadas-3", "cat": "empanadas", "nombre": "3 empanadas", "desc": "Pa' abrir el apetito.", "precio": {"calle": 2900, "cc": 3300}, "arte": "empanada", "foto": "img/empanadas-3.webp" },
-    { "id": "empanadas-5", "cat": "empanadas", "nombre": "5 empanadas", "desc": "La media mañana resuelta.", "precio": {"calle": 4700, "cc": 5300}, "arte": "empanada", "foto": "img/empanadas-5.webp" },
-    { "id": "empanadas-9", "cat": "empanadas", "nombre": "9 empanadas", "desc": "Pa' compartir, si le nace.", "precio": {"calle": 8400, "cc": 9500}, "arte": "empanada", "foto": "img/empanadas-9.webp" },
-    { "id": "empanadas-20", "cat": "empanadas", "nombre": "20 empanadas", "desc": "Pa' la oficina o la visita.", "precio": {"calle": 18500, "cc": 21000}, "arte": "empanada", "foto": "img/empanadas-9.webp" },
-    { "id": "combo-don-gil", "cat": "combos", "nombre": "Combo Don Gil", "desc": "12 empanadas + 2 aborrajados.", "precio": {"calle": 14900, "cc": 17800}, "arte": "combo", "destacado": true, "foto": "img/aborrajados-4.webp" },
-    { "id": "kilo", "cat": "combos", "nombre": "Kilo de empanadas", "desc": "65 unidades. Pa' mí, pa' ti, pa' todos.", "precio": {"calle": 54000, "cc": 59000}, "arte": "caja", "destacado": true, "foto": "img/kilo.webp" },
-    { "id": "bunuelo", "cat": "bunuelos", "nombre": "Buñuelo o pandebono", "desc": "Unidad, bien calientico.", "precio": {"calle": 900, "cc": 900}, "arte": "bunuelo", "foto": "img/bunuelo.webp" },
-    { "id": "bunuelos-3", "cat": "bunuelos", "nombre": "3 buñuelos o pandebonos", "desc": "Uno nunca es uno.", "precio": {"calle": 2500, "cc": 2500}, "arte": "bunuelo", "foto": "img/bunuelos-3.webp" },
-    { "id": "conito", "cat": "bunuelos", "nombre": "Conito con arequipe", "desc": "3 pandebonos o buñuelos bañados en arequipe.", "precio": {"calle": 4200, "cc": 4200}, "arte": "cono", "destacado": true, "foto": "img/bunuelos-3.webp" },
-    { "id": "bunuelo-mozzarella", "cat": "bunuelos", "nombre": "Buñuelo de mozzarella", "desc": "Relleno de queso derretido.", "precio": {"calle": 2500, "cc": 2500}, "arte": "bunuelo", "foto": "img/bunuelo-crocante.webp" },
-    { "id": "bunuelo-mozzarella-arequipe", "cat": "bunuelos", "nombre": "Buñuelo mozzarella + arequipe", "desc": "Una cosa de locos, pues.", "precio": {"calle": 3800, "cc": 3800}, "arte": "bunuelo", "destacado": true, "foto": "img/bunuelo.webp" },
-    { "id": "aborrajado", "cat": "aborrajados", "nombre": "Aborrajadito", "desc": "Maduro dulce relleno de queso.", "precio": {"calle": 2200, "cc": 2600}, "arte": "aborrajado", "foto": "img/aborrajado.webp" },
-    { "id": "aborrajados-4", "cat": "aborrajados", "nombre": "4 aborrajaditos", "desc": "Pa' no pelear por el último.", "precio": {"calle": 7900, "cc": 9500}, "arte": "aborrajado", "foto": "img/aborrajados-4.webp" },
-    { "id": "granizado", "cat": "bebidas", "nombre": "Granizado de fruta 24 oz", "desc": "Natural, bien frío.", "precio": {"calle": 7500, "cc": 7500}, "arte": "vaso", "foto": "img/granizado.webp" },
-    { "id": "avena", "cat": "bebidas", "nombre": "Avena 14 oz", "desc": "Cremosa, de la casa.", "precio": {"calle": 6800, "cc": 6800}, "arte": "vaso", "foto": "img/avena.webp" },
-    { "id": "milo-9", "cat": "bebidas", "nombre": "Milo pequeño 9 oz", "desc": "", "precio": {"calle": 4400, "cc": 4400}, "arte": "taza" },
-    { "id": "milo-14", "cat": "bebidas", "nombre": "Milo grande 14 oz", "desc": "", "precio": {"calle": 6200, "cc": 6200}, "arte": "taza" },
-    { "id": "chocolate", "cat": "bebidas", "nombre": "Chocolate 9 oz", "desc": "", "precio": {"calle": 3500, "cc": 3500}, "arte": "taza" },
-    { "id": "cafe-leche", "cat": "bebidas", "nombre": "Café con leche 6 oz", "desc": "", "precio": {"calle": 3200, "cc": 3200}, "arte": "taza" },
-    { "id": "tinto", "cat": "bebidas", "nombre": "Tinto 6 oz", "desc": "", "precio": {"calle": 1900, "cc": 1900}, "arte": "taza" }
-  ]
+    {
+      "id": "empanada",
+      "cat": "empanadas",
+      "nombre": "Empanadita",
+      "desc": "La de siempre: crocantica y bien cargadita.",
+      "precio": {
+        "calle": 1000,
+        "cc": 1000
+      },
+      "arte": "empanada",
+      "foto": "img/empanada.webp"
+    },
+    {
+      "id": "empanadas-3",
+      "cat": "empanadas",
+      "nombre": "3 empanadas",
+      "desc": "Pa' abrir el apetito.",
+      "precio": {
+        "calle": 2900,
+        "cc": 3300
+      },
+      "arte": "empanada",
+      "foto": "img/empanadas-3.webp"
+    },
+    {
+      "id": "empanadas-5",
+      "cat": "empanadas",
+      "nombre": "5 empanadas",
+      "desc": "La media mañana resuelta.",
+      "precio": {
+        "calle": 4700,
+        "cc": 5300
+      },
+      "arte": "empanada",
+      "foto": "img/empanadas-5.webp"
+    },
+    {
+      "id": "empanadas-9",
+      "cat": "empanadas",
+      "nombre": "9 empanadas",
+      "desc": "Pa' compartir, si le nace.",
+      "precio": {
+        "calle": 8400,
+        "cc": 9500
+      },
+      "arte": "empanada",
+      "foto": "img/empanadas-9.webp"
+    },
+    {
+      "id": "empanadas-20",
+      "cat": "empanadas",
+      "nombre": "20 empanadas",
+      "desc": "Pa' la oficina o la visita.",
+      "precio": {
+        "calle": 18500,
+        "cc": 21000
+      },
+      "arte": "empanada",
+      "foto": "img/empanadas-9.webp"
+    },
+    {
+      "id": "combo-don-gil",
+      "cat": "combos",
+      "nombre": "Combo Don Gil",
+      "desc": "12 empanadas + 2 aborrajados.",
+      "precio": {
+        "calle": 14900,
+        "cc": 17800
+      },
+      "arte": "combo",
+      "destacado": true,
+      "foto": "img/aborrajados-4.webp"
+    },
+    {
+      "id": "kilo",
+      "cat": "combos",
+      "nombre": "Kilo de empanadas",
+      "desc": "65 unidades. Pa' mí, pa' ti, pa' todos.",
+      "precio": {
+        "calle": 54000,
+        "cc": 59000
+      },
+      "arte": "caja",
+      "destacado": true,
+      "foto": "img/kilo.webp"
+    },
+    {
+      "id": "bunuelo",
+      "cat": "bunuelos",
+      "nombre": "Buñuelo o pandebono",
+      "desc": "Unidad, bien calientico.",
+      "precio": {
+        "calle": 900,
+        "cc": 900
+      },
+      "arte": "bunuelo",
+      "foto": "img/bunuelo.webp"
+    },
+    {
+      "id": "bunuelos-3",
+      "cat": "bunuelos",
+      "nombre": "3 buñuelos o pandebonos",
+      "desc": "Uno nunca es uno.",
+      "precio": {
+        "calle": 2500,
+        "cc": 2500
+      },
+      "arte": "bunuelo",
+      "foto": "img/bunuelos-3.webp"
+    },
+    {
+      "id": "conito",
+      "cat": "bunuelos",
+      "nombre": "Conito con arequipe",
+      "desc": "3 pandebonos o buñuelos bañados en arequipe.",
+      "precio": {
+        "calle": 4200,
+        "cc": 4200
+      },
+      "arte": "cono",
+      "destacado": true,
+      "foto": "img/bunuelos-3.webp"
+    },
+    {
+      "id": "bunuelo-mozzarella",
+      "cat": "bunuelos",
+      "nombre": "Buñuelo de mozzarella",
+      "desc": "Relleno de queso derretido.",
+      "precio": {
+        "calle": 2500,
+        "cc": 2500
+      },
+      "arte": "bunuelo",
+      "foto": "img/bunuelo-crocante.webp"
+    },
+    {
+      "id": "bunuelo-mozzarella-arequipe",
+      "cat": "bunuelos",
+      "nombre": "Buñuelo mozzarella + arequipe",
+      "desc": "Una cosa de locos, pues.",
+      "precio": {
+        "calle": 3800,
+        "cc": 3800
+      },
+      "arte": "bunuelo",
+      "destacado": true,
+      "foto": "img/bunuelo.webp"
+    },
+    {
+      "id": "aborrajado",
+      "cat": "aborrajados",
+      "nombre": "Aborrajadito",
+      "desc": "Maduro dulce relleno de queso.",
+      "precio": {
+        "calle": 2200,
+        "cc": 2600
+      },
+      "arte": "aborrajado",
+      "foto": "img/aborrajado.webp"
+    },
+    {
+      "id": "aborrajados-4",
+      "cat": "aborrajados",
+      "nombre": "4 aborrajaditos",
+      "desc": "Pa' no pelear por el último.",
+      "precio": {
+        "calle": 7900,
+        "cc": 9500
+      },
+      "arte": "aborrajado",
+      "foto": "img/aborrajados-4.webp"
+    },
+    {
+      "id": "granizado",
+      "cat": "bebidas",
+      "nombre": "Granizado de fruta 24 oz",
+      "desc": "Natural, bien frío.",
+      "precio": {
+        "calle": 7500,
+        "cc": 7500
+      },
+      "arte": "vaso",
+      "foto": "img/granizado.webp"
+    },
+    {
+      "id": "avena",
+      "cat": "bebidas",
+      "nombre": "Avena 14 oz",
+      "desc": "Cremosa, de la casa.",
+      "precio": {
+        "calle": 6800,
+        "cc": 6800
+      },
+      "arte": "vaso",
+      "foto": "img/avena.webp"
+    },
+    {
+      "id": "milo-9",
+      "cat": "bebidas",
+      "nombre": "Milo pequeño 9 oz",
+      "desc": "",
+      "precio": {
+        "calle": 4400,
+        "cc": 4400
+      },
+      "arte": "taza"
+    },
+    {
+      "id": "milo-14",
+      "cat": "bebidas",
+      "nombre": "Milo grande 14 oz",
+      "desc": "",
+      "precio": {
+        "calle": 6200,
+        "cc": 6200
+      },
+      "arte": "taza"
+    },
+    {
+      "id": "chocolate",
+      "cat": "bebidas",
+      "nombre": "Chocolate 9 oz",
+      "desc": "",
+      "precio": {
+        "calle": 3500,
+        "cc": 3500
+      },
+      "arte": "taza"
+    },
+    {
+      "id": "cafe-leche",
+      "cat": "bebidas",
+      "nombre": "Café con leche 6 oz",
+      "desc": "",
+      "precio": {
+        "calle": 3200,
+        "cc": 3200
+      },
+      "arte": "taza"
+    },
+    {
+      "id": "tinto",
+      "cat": "bebidas",
+      "nombre": "Tinto 6 oz",
+      "desc": "",
+      "precio": {
+        "calle": 1900,
+        "cc": 1900
+      },
+      "arte": "taza"
+    }
+  ],
+  "_nota_domicilio": "ZONAS Y TARIFAS DE EJEMPLO. Los barrios y los valores son un supuesto para la demo; Don Gil debe reemplazarlos por su cobertura y sus tarifas reales."
 }

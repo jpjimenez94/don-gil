@@ -4,8 +4,9 @@ import chat from "../handlers/chat.js";
 import orders from "../handlers/orders.js";
 import menu from "../handlers/menu.js";
 import whatsapp from "../handlers/whatsapp.js";
+import estado from "../handlers/estado.js";
 
-export const rutas = { chat, orders, menu, whatsapp };
+export const rutas = { chat, orders, menu, whatsapp, estado };
 
 export default function handler(req, res) {
   // En Vercel la reescritura cambia req.url a /api/index, así que la ruta original llega en ?ruta=.

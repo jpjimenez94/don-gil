@@ -7,9 +7,15 @@
   const entrada = document.getElementById("chat-entrada");
   const sugerencias = document.getElementById("chat-sugerencias");
   const enviarBoton = formulario.querySelector("button");
+  const estadoCabeza = document.getElementById("chat-estado");
   const pesos = (n) => "$" + n.toLocaleString("es-CO");
+  const esperar = (ms) => new Promise((listo) => setTimeout(listo, ms));
+
+  const EN_LINEA = "Asistente de pedidos · en línea";
+  const CONSULTA_ESTADO_MS = 4000;
 
   const historial = [];
+  const misPedidos = new Map(); // número de pedido -> último estado que el cliente ya vio
   let ocupado = false;
   mensajes.setAttribute("data-lenis-prevent", "");
 
@@ -22,6 +28,31 @@
     return nodo;
   }
 
+  function mostrarEscribiendo() {
+    estadoCabeza.textContent = "escribiendo…";
+    const nodo = burbujaMensaje("", "msg--bot escribiendo");
+    nodo.innerHTML = "<i></i><i></i><i></i>";
+    return () => {
+      nodo.remove();
+      estadoCabeza.textContent = EN_LINEA;
+    };
+  }
+
+  // Una persona no contesta al instante ni manda todo en un solo bloque:
+  // cada párrafo sale como un mensaje aparte, tras una pausa proporcional a su largo.
+  async function escribirComoPersona(texto, yaEsperado = 0) {
+    const partes = texto.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+    for (const [i, parte] of partes.entries()) {
+      const pausa = Math.min(2600, 500 + parte.length * 22) - (i === 0 ? yaEsperado : 0);
+      if (pausa > 0) {
+        const quitar = mostrarEscribiendo();
+        await esperar(pausa);
+        quitar();
+      }
+      burbujaMensaje(parte, "msg--bot");
+    }
+  }
+
   function tarjetaPedido(pedido) {
     const nodo = document.createElement("div");
     nodo.className = "msg msg--pedido";
@@ -29,7 +60,8 @@
     titulo.textContent = `Pedido ${pedido.numero} enviado a ${pedido.sede}`;
     const detalle = document.createElement("span");
     const productos = pedido.lineas.map((l) => `${l.cantidad} x ${l.producto}`).join(", ");
-    detalle.textContent = `${productos} · ${pesos(pedido.total)} · ${pedido.pago}`;
+    const domicilio = pedido.domicilio ? ` · Domicilio ${pesos(pedido.domicilio)}` : "";
+    detalle.textContent = `${productos}${domicilio} · Total ${pesos(pedido.total)} · ${pedido.pago}`;
     nodo.append(titulo, detalle);
     mensajes.append(nodo);
     mensajes.scrollTop = mensajes.scrollHeight;
@@ -40,7 +72,7 @@
     chat.setAttribute("aria-hidden", "false");
     burbuja.classList.add("is-oculta");
     if (!mensajes.childElementCount) {
-      burbujaMensaje("¡Quiubo pues! Bienvenido a Don Gil. ¿Qué se le antoja hoy, mijito?", "msg--bot");
+      burbujaMensaje("¡Quiubo pues! Bienvenido a Don Gil. ¿Qué se le antoja hoy?", "msg--bot");
     }
     if (mensaje && !ocupado) enviar(mensaje);
     else entrada.focus({ preventScroll: true });
@@ -61,23 +93,30 @@
     burbujaMensaje(texto, "msg--yo");
     historial.push({ role: "user", content: texto });
 
-    const escribiendo = burbujaMensaje("", "msg--bot escribiendo");
-    escribiendo.innerHTML = "<i></i><i></i><i></i>";
+    await esperar(600); // el "visto" antes de empezar a escribir
+    const inicio = Date.now();
+    const quitar = mostrarEscribiendo();
 
     try {
       const respuesta = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mensajes: historial }),
+        body: JSON.stringify({ mensajes: historial, pedidos: [...misPedidos.keys()] }),
       });
       const datos = await respuesta.json();
-      escribiendo.remove();
       if (!respuesta.ok) throw new Error(datos.error || "Error");
       historial.push({ role: "assistant", content: datos.respuesta });
-      burbujaMensaje(datos.respuesta, "msg--bot");
-      if (datos.pedido) tarjetaPedido(datos.pedido);
+      const primera = datos.respuesta.split(/\n\s*\n/)[0] ?? "";
+      const falta = Math.min(2600, 500 + primera.length * 22) - (Date.now() - inicio);
+      if (falta > 0) await esperar(falta);
+      quitar();
+      await escribirComoPersona(datos.respuesta, Infinity);
+      if (datos.pedido) {
+        tarjetaPedido(datos.pedido);
+        misPedidos.set(datos.pedido.numero, datos.pedido.estado);
+      }
     } catch (error) {
-      escribiendo.remove();
+      quitar();
       historial.pop();
       burbujaMensaje(error.message, "msg--error");
     } finally {
@@ -86,6 +125,25 @@
       entrada.focus({ preventScroll: true });
     }
   }
+
+  // Cuando la sede mueve el pedido en el panel, el cliente recibe el aviso aquí.
+  async function consultarEstados() {
+    const pendientes = [...misPedidos].filter(([, estado]) => estado !== "Entregado").map(([numero]) => numero);
+    if (!pendientes.length || ocupado) return;
+    try {
+      const { pedidos } = await fetch(`/api/estado?numeros=${pendientes.join(",")}`).then((r) => r.json());
+      for (const pedido of pedidos) {
+        if (misPedidos.get(pedido.numero) === pedido.estado || !pedido.mensaje) continue;
+        misPedidos.set(pedido.numero, pedido.estado);
+        historial.push({ role: "assistant", content: pedido.mensaje });
+        await escribirComoPersona(pedido.mensaje);
+        if (!chat.classList.contains("is-abierto")) burbuja.classList.add("is-aviso");
+      }
+    } catch {
+      // sin conexión: se reintenta en el siguiente ciclo
+    }
+  }
+  setInterval(consultarEstados, CONSULTA_ESTADO_MS);
 
   formulario.addEventListener("submit", (evento) => {
     evento.preventDefault();
@@ -99,7 +157,10 @@
   document.getElementById("chat-cerrar").addEventListener("click", cerrar);
   document.addEventListener("keydown", (evento) => evento.key === "Escape" && cerrar());
   document.querySelectorAll("[data-abrir-chat]").forEach((boton) => {
-    boton.addEventListener("click", () => abrir(boton.dataset.mensaje));
+    boton.addEventListener("click", () => {
+      burbuja.classList.remove("is-aviso");
+      abrir(boton.dataset.mensaje);
+    });
   });
 
   window.abrirChat = abrir;

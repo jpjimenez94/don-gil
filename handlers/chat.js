@@ -1,4 +1,7 @@
 import { responder } from "../lib/agent.js";
+import { buscarPedido } from "../lib/store.js";
+
+const CANAL = "Demo web";
 
 // Chat de demostración de la página: mismo agente que atiende WhatsApp.
 export default async function handler(req, res) {
@@ -17,7 +20,17 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { texto, pedido, aviso } = await responder(historial, { canal: "Demo web", cliente: req.body?.cliente || "Visitante" });
+    const { texto, pedido, aviso } = await responder(historial, { canal: CANAL, cliente: req.body?.cliente || "Visitante" });
+
+    // La conversación queda guardada con el pedido para que la sede la vea en el panel.
+    const conversacion = [...historial.map(({ role, content }) => ({ role, content })), { role: "assistant", content: texto }];
+    const numeros = Array.isArray(req.body?.pedidos) ? req.body.pedidos.slice(0, 10).map(String) : [];
+    for (const anterior of numeros.map(buscarPedido)) {
+      if (anterior?.canal === CANAL) anterior.conversacion = conversacion;
+    }
+    if (pedido) pedido.conversacion = conversacion;
+    if (aviso) aviso.conversacion = conversacion;
+
     return res.status(200).json({ respuesta: texto, pedido, aviso });
   } catch (error) {
     console.error("chat:", error);

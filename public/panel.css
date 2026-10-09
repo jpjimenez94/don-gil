@@ -94,3 +94,22 @@ h2 { font-family: var(--display); font-weight: 400; font-size: 1.2rem; color: va
 @media (prefers-reduced-motion: reduce) {
   .pedido.is-nuevo, .vivo i { animation: none; }
 }
+
+/* Domicilio y conversación */
+.dato--domi { display: flex; justify-content: space-between; gap: 0.6rem; }
+.enlace { background: none; color: var(--vino); font-weight: 700; font-size: 0.85rem; text-decoration: underline; text-underline-offset: 3px; padding: 0.2rem 0; text-align: left; justify-self: start; }
+.enlace strong { text-decoration: none; }
+.conv { border: 0; padding: 0; border-radius: 20px; width: min(460px, calc(100vw - 1.6rem)); max-height: min(680px, calc(100vh - 2rem)); background: #efe7dc; color: var(--tinta); overflow: hidden; margin: auto; }
+.conv[open] { display: flex; flex-direction: column; }
+.conv::backdrop { background: rgba(58, 17, 11, 0.55); }
+.conv__cabeza { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.9rem 1rem; background: #075e54; color: #fff; }
+.conv__cabeza strong { display: block; font-family: var(--display); font-weight: 400; font-size: 1.15rem; }
+.conv__cabeza small { opacity: 0.85; font-size: 0.8rem; }
+.conv__cabeza button { background: none; color: #fff; font-size: 1.8rem; line-height: 1; width: 38px; height: 38px; border-radius: 50%; }
+.conv__cabeza button:hover { background: rgba(255, 255, 255, 0.15); }
+.conv__mensajes { overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.45rem; }
+.msg { max-width: 86%; padding: 0.5rem 0.75rem; border-radius: 0.9rem; font-size: 0.92rem; white-space: pre-wrap; overflow-wrap: anywhere; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1); }
+.msg--cliente { background: #fff; align-self: flex-start; border-top-left-radius: 0.2rem; }
+.msg--agente { background: #d9fdd3; align-self: flex-end; border-top-right-radius: 0.2rem; }
+.msg--sede { background: var(--amarillo-claro); align-self: flex-end; border-top-right-radius: 0.2rem; }
+.msg--sede small { display: block; font-weight: 700; font-size: 0.7rem; opacity: 0.7; margin-bottom: 0.15rem; }
