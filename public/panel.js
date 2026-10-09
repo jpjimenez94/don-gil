@@ -59,7 +59,7 @@ function tarjeta(pedido, esNuevo) {
   return `
     <article class="pedido${esNuevo ? " is-nuevo" : ""}${demorado ? " is-demorado" : ""}">
       <div class="pedido__cabeza">
-        <span class="pedido__numero">${esc(pedido.numero)}</span>
+        <span class="pedido__numero">${esc(pedido.corto)}</span>
         <span class="pedido__tiempo">${hora(pedido.creado)} · ${haceCuanto(pedido.creado)}</span>
       </div>
       <div class="chips">
@@ -95,7 +95,7 @@ function pintar(nuevos = new Set()) {
   $("n-Entregado").textContent = entregados.length;
   $("col-Entregado").innerHTML =
     entregados
-      .map((p) => `<div class="fila"><button class="enlace" type="button" data-ver="${esc(p.numero)}"><strong>${esc(p.numero)}</strong></button><span>${esc(p.nombre)} · ${p.lineas.map((l) => `${l.cantidad}× ${esc(l.producto)}`).join(", ")}</span><span class="fila__hora">${hora(p.creado)}</span><span>${pesos(p.total)}</span></div>`)
+      .map((p) => `<div class="fila"><button class="enlace" type="button" data-ver="${esc(p.numero)}"><strong>${esc(p.corto)}</strong></button><span>${esc(p.nombre)} · ${p.lineas.map((l) => `${l.cantidad}× ${esc(l.producto)}`).join(", ")}</span><span class="fila__hora">${hora(p.creado)}</span><span>${pesos(p.total)}</span></div>`)
       .join("") || `<p class="vacio">Aún no se ha entregado ningún pedido.</p>`;
 
   $("c-nuevos").textContent = pedidos.filter((p) => p.estado === "Nuevo").length;
@@ -169,7 +169,7 @@ document.querySelector("main").addEventListener("click", (evento) => {
   if (ver) {
     const pedido = datos.pedidos.find((p) => p.numero === ver.dataset.ver);
     const aviso = datos.avisos.find((a) => a.id === ver.dataset.verAviso);
-    if (pedido) verConversacion(`Pedido ${pedido.numero}`, `${pedido.nombre} · ${pedido.sede} · ${pedido.canal}`, pedido.conversacion);
+    if (pedido) verConversacion(`Pedido ${pedido.corto}`, `${pedido.nombre} · ${pedido.sede} · ${pedido.canal}`, pedido.conversacion);
     if (aviso) verConversacion("Aviso para el equipo", `${aviso.sede} · ${aviso.canal} · ${aviso.cliente}`, aviso.conversacion);
     return;
   }

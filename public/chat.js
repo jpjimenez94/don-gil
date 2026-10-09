@@ -57,7 +57,7 @@
     const nodo = document.createElement("div");
     nodo.className = "msg msg--pedido";
     const titulo = document.createElement("strong");
-    titulo.textContent = `Pedido ${pedido.numero} enviado a ${pedido.sede}`;
+    titulo.textContent = `Pedido ${pedido.corto} enviado a ${pedido.sede}`;
     const detalle = document.createElement("span");
     const productos = pedido.lineas.map((l) => `${l.cantidad} x ${l.producto}`).join(", ");
     const domicilio = pedido.domicilio ? ` · Domicilio ${pesos(pedido.domicilio)}` : "";
