@@ -15,6 +15,7 @@ async function avisarAlCliente(registro, texto) {
 //   { numero | aviso, mensaje }   la sede le escribe al cliente
 //   { aviso }                     marca un aviso como atendido
 //   { sede, producto, agotado }   marca un producto como agotado o disponible en esa sede
+//   { sede, productos, agotado }  lo mismo para varios a la vez (una categoría completa)
 //   { sede, config }              cambia la información de la sede: abierta, horario, direccion, whatsapp, tarifas
 export default async function handler(req, res) {
   if (req.method === "GET") {
@@ -22,7 +23,12 @@ export default async function handler(req, res) {
   }
   if (req.method !== "POST") return res.status(405).json({ error: "Método no permitido" });
 
-  const { numero, estado, motivo, aviso, mensaje, producto, agotado, sede, config } = req.body ?? {};
+  const { numero, estado, motivo, aviso, mensaje, producto, productos, agotado, sede, config } = req.body ?? {};
+
+  if (Array.isArray(productos)) {
+    const hechos = productos.slice(0, 100).map((id) => marcarAgotado(String(sede), String(id), Boolean(agotado)));
+    return hechos.length && hechos.every(Boolean) ? res.status(200).json({ ok: true }) : res.status(400).json({ error: "Sede o producto no válido" });
+  }
 
   if (producto !== undefined) {
     return marcarAgotado(String(sede), String(producto), Boolean(agotado)) ? res.status(200).json({ ok: true }) : res.status(400).json({ error: "Sede o producto no válido" });

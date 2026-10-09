@@ -217,3 +217,8 @@ h2 { font-family: var(--display); font-weight: 400; font-size: 1.2rem; color: va
 .volver { justify-self: start; background: #fff; color: var(--vino); font-weight: 700; padding: 0.55rem 1rem; border-radius: 999px; border: 2px solid var(--vino); }
 .volver:hover { background: var(--vino); color: var(--crema); }
 .sede-estado h2 { font-size: 1.6rem; }
+
+/* Interruptor de toda la categoría */
+.interruptor--todos { border-bottom: 2px solid var(--vino); padding-bottom: 0.7rem; margin-bottom: 0.2rem; }
+.interruptor--todos strong { font-family: var(--display); font-weight: 400; font-size: 1.2rem; color: var(--vino); display: block; }
+.interruptor--todos small { font-size: 0.8rem; opacity: 0.7; }

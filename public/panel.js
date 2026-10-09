@@ -296,9 +296,21 @@ function pintarCarta() {
       </div>
     </form>
 
-    <p class="nota">Apague lo que se acabó en ${esc(sede.nombre)}. El asistente deja de ofrecerlo en esta sede en el siguiente mensaje. Los precios de los productos son los de la carta y no se cambian aquí.</p>
+    <p class="nota">Apague lo que se acabó en ${esc(sede.nombre)}: un producto, o la lista completa con el interruptor de su título. El asistente deja de ofrecerlo en esta sede en el siguiente mensaje. Los precios son los de la carta y no se cambian aquí.</p>
     <div class="carta">
-      ${menu.categorias.map((c) => `<section class="tarjeta"><h2>${esc(c.nombre)}</h2>${productosDe(c)}</section>`).join("")}
+      ${menu.categorias
+        .map((c) => {
+          const ids = menu.productos.filter((p) => p.cat === c.id).map((p) => p.id);
+          const disponibles = ids.filter((id) => !sede.agotados.includes(id)).length;
+          return `<section class="tarjeta">
+            <label class="interruptor interruptor--todos">
+              <span><strong>${esc(c.nombre)}</strong><small>${disponibles} de ${ids.length} disponibles</small></span>
+              <input type="checkbox" data-categoria="${esc(c.id)}" ${disponibles ? "checked" : ""} aria-label="Todos los productos de ${esc(c.nombre)} disponibles">
+            </label>
+            ${productosDe(c)}
+          </section>`;
+        })
+        .join("")}
     </div>`;
 }
 
@@ -420,6 +432,10 @@ $("carta").addEventListener("change", async (evento) => {
   const casilla = evento.target;
   if (casilla.id === "sede-abierta") await enviar({ sede: sede.id, config: { abierta: casilla.checked } });
   else if (casilla.dataset.producto) await enviar({ sede: sede.id, producto: casilla.dataset.producto, agotado: !casilla.checked });
+  else if (casilla.dataset.categoria) {
+    const productos = menu.productos.filter((p) => p.cat === casilla.dataset.categoria).map((p) => p.id);
+    await enviar({ sede: sede.id, productos, agotado: !casilla.checked });
+  }
   else return; // los campos del formulario se guardan con el botón
   pintarCarta();
 });
