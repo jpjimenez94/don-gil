@@ -3,6 +3,39 @@ const $ = (sel, raiz = document) => raiz.querySelector(sel);
 const sinMovimiento = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const hayGsap = typeof gsap !== "undefined" && typeof ScrollTrigger !== "undefined";
 
+// Analítica: le cuenta al panel qué se mira. No envía nada del visitante, solo el tipo de evento.
+function registrar(tipo, clave = "") {
+  try {
+    navigator.sendBeacon("/api/evento", new Blob([JSON.stringify({ tipo, clave })], { type: "application/json" }));
+  } catch {
+    // la analítica nunca debe romper la página
+  }
+}
+window.registrarEvento = registrar;
+
+// Un producto cuenta como "visto" cuando su tarjeta lleva un segundo en pantalla, una vez por visita.
+const yaVistos = new Set();
+const observador =
+  "IntersectionObserver" in window
+    ? new IntersectionObserver(
+        (entradas) => {
+          for (const entrada of entradas) {
+            const tarjeta = entrada.target;
+            clearTimeout(tarjeta.temporizador);
+            if (!entrada.isIntersecting) continue;
+            tarjeta.temporizador = setTimeout(() => {
+              const id = tarjeta.dataset.producto;
+              if (yaVistos.has(id)) return;
+              yaVistos.add(id);
+              registrar("producto_visto", id);
+            }, 1000);
+          }
+        },
+        { threshold: 0.6 },
+      )
+    : null;
+const observar = (raiz) => raiz.querySelectorAll("[data-producto]").forEach((tarjeta) => observador?.observe(tarjeta));
+
 // Foto real si el producto la tiene; si no, la ilustración.
 const arteDe = (producto, clase) =>
   producto.foto
@@ -40,6 +73,7 @@ function tarjetaPlato(producto) {
   const agotado = estado.menu.agotados?.includes(producto.id);
   const tarjeta = document.createElement("article");
   tarjeta.className = agotado ? "plato is-agotado" : "plato";
+  tarjeta.dataset.producto = producto.id;
   tarjeta.innerHTML = `
     ${arteDe(producto, "plato__arte")}
     <h3></h3>
@@ -64,6 +98,7 @@ function pintarGrilla(animar = true) {
   const productos = estado.menu.productos.filter((p) => p.cat === estado.cat);
   grilla.replaceChildren(...productos.map(tarjetaPlato));
   pintarArte(grilla);
+  observar(grilla);
   if (animar && hayGsap && !sinMovimiento) {
     gsap.from(grilla.children, { y: 40, opacity: 0, duration: 0.5, stagger: 0.05, ease: "power3.out", clearProps: "all" });
   }
@@ -75,6 +110,7 @@ function pintarAntojos() {
   for (const producto of estado.menu.productos.filter((p) => p.destacado && !estado.menu.agotados?.includes(p.id))) {
     const tarjeta = document.createElement("article");
     tarjeta.className = "antojo";
+    tarjeta.dataset.producto = producto.id;
     tarjeta.innerHTML = `
       ${arteDe(producto, "antojo__arte")}
       <h3></h3>
@@ -89,6 +125,7 @@ function pintarAntojos() {
     pista.append(tarjeta);
   }
   pintarArte(pista);
+  observar(pista);
 }
 
 function pintarSedes() {
@@ -116,6 +153,7 @@ function pintarSedes() {
 
 function elegirSede(id) {
   estado.sede = estado.menu.sedes.find((s) => s.id === id);
+  registrar("sede", id);
   pintarControles();
   pintarGrilla();
   pintarAntojos();
@@ -124,12 +162,14 @@ function elegirSede(id) {
 
 function elegirCategoria(id) {
   estado.cat = id;
+  registrar("categoria", id);
   pintarControles();
   pintarGrilla();
   if (hayGsap) ScrollTrigger.refresh();
 }
 
 function pedir(producto) {
+  registrar("producto_pedir", producto.id);
   window.abrirChat?.(`Hola, quiero pedir: ${producto.nombre}. Sede ${estado.sede.nombre}`);
 }
 
@@ -281,6 +321,7 @@ async function iniciar() {
   pintarGrilla(false);
   pintarAntojos();
   pintarSedes();
+  registrar("visita");
 
   if (!hayGsap || sinMovimiento) return;
   gsap.registerPlugin(ScrollTrigger);

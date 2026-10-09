@@ -7,7 +7,23 @@
     "instagram": "https://www.instagram.com/dongilempanaditasybunuelitos/",
     "tiktok": "https://www.tiktok.com/@dongilempanaditas",
     "whatsapp_pedidos": null,
-    "_nota_whatsapp": "Número único de pedidos con indicativo, solo dígitos (ej. 573001234567). Mientras sea null, los botones abren el chat de demostración de la página; con un número, abren WhatsApp con el mensaje ya escrito."
+    "_nota_whatsapp": "Número único de pedidos con indicativo, solo dígitos (ej. 573001234567). Mientras sea null, los botones abren el chat de demostración de la página; con un número, abren WhatsApp con el mensaje ya escrito.",
+    "sitio": "https://don-gil-chi.vercel.app",
+    "redes": {
+      "Instagram": "@dongilempanaditasybunuelitos (instagram.com/dongilempanaditasybunuelitos)",
+      "TikTok": "@dongilempanaditas (tiktok.com/@dongilempanaditas)",
+      "Facebook": "página Dongil",
+      "Threads": "@dongilempanaditasybunuelitos"
+    },
+    "historia": "Don Gil nació de una receta de Papá que lleva cincuenta años en la familia. La marca abrió su primera sede en Jamundí y hoy tiene cinco puntos entre Cali y Jamundí. El personaje de las redes es Don Gerardo, con su sombrero.",
+    "productos_estrella": "Las empanaditas (crocantes, con guiso y ají), los buñuelos tradicionales y rellenos de mozzarella o arequipe, los aborrajados y el Combo Don Gil.",
+    "apoyo_a_emprendedores": "Don Gil entrega equipos a emprendedores que quieren sacar adelante su negocio.",
+    "preguntas_frecuentes": [
+      "Las empanadas son de guiso y carne; se sirven con ají.",
+      "El kilo trae 65 empanadas y es lo que más piden para reuniones.",
+      "El pago es contra entrega; todavía no hay pago en línea.",
+      "Para eventos o más de 3 kilos, una persona del equipo arma la cotización."
+    ]
   },
   "sedes": [
     {

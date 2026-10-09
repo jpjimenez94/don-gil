@@ -1,5 +1,5 @@
 import { responder } from "../lib/agent.js";
-import { buscarPedido } from "../lib/store.js";
+import { buscarPedido, registrarEvento } from "../lib/store.js";
 
 const CANAL = "Demo web";
 
@@ -18,6 +18,8 @@ export default async function handler(req, res) {
   if (!process.env.ANTHROPIC_API_KEY && !process.env.ANTHROPIC_AUTH_TOKEN) {
     return res.status(503).json({ error: "Falta configurar ANTHROPIC_API_KEY en el servidor." });
   }
+
+  registrarEvento("mensaje", CANAL);
 
   try {
     const { texto, pedido, aviso } = await responder(historial, { canal: CANAL, cliente: req.body?.cliente || "Visitante" });

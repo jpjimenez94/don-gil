@@ -21,7 +21,7 @@ const filtro = $("filtro");
 const botonSonido = $("sonido");
 const dialogo = $("conversacion");
 const dialogoCancelar = $("cancelar");
-let datos = { pedidos: [], avisos: [], agotados: [] };
+let datos = { pedidos: [], avisos: [], agotados: [], analitica: null };
 let menu = null;
 let conocidos = null; // números de pedido ya vistos; null hasta la primera carga
 let audio = null;
@@ -176,6 +176,48 @@ function pintarResumen() {
   barras("r-productos", agrupar(pedidos.flatMap((p) => p.lineas), (l) => l.producto, (l) => l.cantidad).slice(0, 6), (n) => `${n} uds`);
   barras("r-entrega", agrupar(pedidos, (p) => (p.entrega === "domicilio" ? "Domicilio" : "Recoger"), () => 1), unidades);
   barras("r-canal", agrupar(pedidos, (p) => p.canal, () => 1), unidades);
+  pintarInteres();
+}
+
+/* ---------- Interés en la página y horarios ---------- */
+
+function columnas(id, valores, etiquetas) {
+  const maximo = Math.max(1, ...valores);
+  $(id).innerHTML = valores
+    .map((valor, i) => `
+      <div class="columna-barra" title="${esc(etiquetas[i])}: ${valor}">
+        <span class="columna-barra__valor">${valor || ""}</span>
+        <i style="height:${(valor / maximo) * 100}%"></i>
+        <span class="columna-barra__pie">${esc(etiquetas[i])}</span>
+      </div>`)
+    .join("");
+}
+
+function pintarInteres() {
+  const a = datos.analitica;
+  if (!a || !menu) return;
+  const nombreSede = (id) => menu.sedes.find((s) => s.id === id)?.nombre ?? id;
+  const nombreProducto = (id) => menu.productos.find((p) => p.id === id)?.nombre ?? id;
+  const nombreCategoria = (id) => menu.categorias.find((c) => c.id === id)?.nombre ?? id;
+  const veces = (n) => `${n} ${n === 1 ? "vez" : "veces"}`;
+  const conNombre = (filas, nombre) => filas.slice(0, 6).map(([clave, n]) => [nombre(clave), n]);
+
+  const pedidosWeb = datos.pedidos.filter((p) => p.canal === "Demo web" && p.estado !== "Cancelado").length;
+  $("a-visitas").textContent = a.visitas;
+  $("a-chats").textContent = a.chats;
+  $("a-mensajes").textContent = a.mensajes;
+  $("a-conversion").textContent = a.visitas ? `${Math.round((pedidosWeb / a.visitas) * 100)} %` : "—";
+
+  barras("a-sedes", conNombre(a.sedes, nombreSede), veces);
+  barras("a-categorias", conNombre(a.categorias, nombreCategoria), veces);
+  barras("a-vistos", conNombre(a.productosVistos, nombreProducto), veces);
+  barras("a-pedir", conNombre(a.productosPedir, nombreProducto), veces);
+
+  // De 6 a. m. a 10 p. m., que es cuando hay sedes abiertas.
+  const horas = Array.from({ length: 17 }, (_, i) => i + 6);
+  columnas("a-horas", horas.map((h) => a.porHora[h]), horas.map((h) => `${h % 12 || 12}${h < 12 ? "a" : "p"}`));
+  const dias = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+  columnas("a-dias", [1, 2, 3, 4, 5, 6, 0].map((d) => a.porDia[d]), dias);
 }
 
 /* ---------- Disponibilidad ---------- */

@@ -1,4 +1,4 @@
-import { store, cambiarEstado, atenderAviso, buscarPedido, buscarAviso, agregarMensajeManual, marcarAgotado, ESTADOS } from "../lib/store.js";
+import { store, cambiarEstado, atenderAviso, buscarPedido, buscarAviso, agregarMensajeManual, marcarAgotado, resumenDeEventos, ESTADOS } from "../lib/store.js";
 import { enviarWhatsApp } from "../lib/whatsapp.js";
 import { menu } from "../lib/agent.js";
 
@@ -18,7 +18,7 @@ async function avisarAlCliente(registro, texto) {
 //   { producto, agotado }         marca un producto como agotado o disponible
 export default async function handler(req, res) {
   if (req.method === "GET") {
-    return res.status(200).json({ pedidos: store.pedidos, avisos: store.avisos, agotados: store.agotados, estados: ESTADOS });
+    return res.status(200).json({ pedidos: store.pedidos, avisos: store.avisos, agotados: store.agotados, analitica: resumenDeEventos(), estados: ESTADOS });
   }
   if (req.method !== "POST") return res.status(405).json({ error: "Método no permitido" });
 

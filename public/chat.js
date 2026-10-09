@@ -82,6 +82,7 @@
     chat.setAttribute("aria-hidden", "false");
     burbuja.classList.add("is-oculta");
     if (!mensajes.childElementCount) {
+      window.registrarEvento?.("chat_abierto");
       burbujaMensaje("¡Quiubo pues! Bienvenido a Don Gil. ¿Qué se le antoja hoy?", "msg--bot");
     }
     if (mensaje && !ocupado) enviar(mensaje);
