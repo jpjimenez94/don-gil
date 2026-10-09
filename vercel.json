@@ -1,4 +1,14 @@
 {
-  "functions": { "api/index.js": { "maxDuration": 60, "includeFiles": "data/**" } },
-  "rewrites": [{ "source": "/api/:ruta*", "destination": "/api/index" }]
+  "functions": {
+    "api/index.js": {
+      "maxDuration": 60,
+      "includeFiles": "data/**"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/:ruta",
+      "destination": "/api/index?ruta=:ruta"
+    }
+  ]
 }
