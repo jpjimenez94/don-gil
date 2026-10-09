@@ -1,4 +1,4 @@
-// Panel de sede: tablero de pedidos que se actualiza solo.
+// Panel de sede: tablero de pedidos, resumen de ventas y disponibilidad de la carta.
 const INTERVALO_MS = 3000;
 const MINUTOS_DEMORA = 10; // un pedido nuevo sin atender pasa a rojo
 // Cada botón mueve el pedido un paso y le avisa al cliente por el chat.
@@ -9,18 +9,24 @@ const SIGUIENTE = {
 };
 const COLUMNAS = { "Nuevo": "col-Nuevo", "En preparación": "col-prep", "Listo": "col-Listo" };
 const CONTADORES = { "Nuevo": "n-Nuevo", "En preparación": "n-prep", "Listo": "n-Listo" };
+const CERRADOS = ["Entregado", "Cancelado"];
 
 const $ = (id) => document.getElementById(id);
-const pesos = (n) => "$" + n.toLocaleString("es-CO");
+const pesos = (n) => "$" + Math.round(n).toLocaleString("es-CO");
 const hora = (iso) => new Date(iso).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" });
 const ESCAPES = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" };
 const esc = (texto) => String(texto ?? "").replace(/[&<>"]/g, (c) => ESCAPES[c]);
 
 const filtro = $("filtro");
 const botonSonido = $("sonido");
-let datos = { pedidos: [], avisos: [] };
+const dialogo = $("conversacion");
+const dialogoCancelar = $("cancelar");
+let datos = { pedidos: [], avisos: [], agotados: [] };
+let menu = null;
 let conocidos = null; // números de pedido ya vistos; null hasta la primera carga
 let audio = null;
+let abierta = null; // conversación abierta: { numero } o { aviso }
+let porCancelar = null;
 
 function recordar(clave, valor) {
   try {
@@ -53,6 +59,10 @@ function timbre() {
   }
 }
 
+const delaSede = (lista) => lista.filter((x) => !filtro.value || x.sede === filtro.value);
+
+/* ---------- Pedidos ---------- */
+
 function tarjeta(pedido, esNuevo) {
   const paso = SIGUIENTE[pedido.estado](pedido);
   const demorado = pedido.estado === "Nuevo" && Date.now() - new Date(pedido.creado) > MINUTOS_DEMORA * 60000;
@@ -74,15 +84,17 @@ function tarjeta(pedido, esNuevo) {
       <p class="dato"><b>Recibe:</b> ${esc(pedido.nombre)}</p>
       ${pedido.direccion ? `<p class="dato"><b>Dirección:</b> ${esc(pedido.direccion)}</p>` : ""}
       ${pedido.notas ? `<p class="dato"><b>Notas:</b> ${esc(pedido.notas)}</p>` : ""}
-      <button class="enlace" type="button" data-ver="${esc(pedido.numero)}">Ver conversación (${pedido.conversacion?.length ?? 0})</button>
+      <div class="pedido__enlaces">
+        <button class="enlace" type="button" data-ver="${esc(pedido.numero)}">Conversación (${pedido.conversacion?.length ?? 0})</button>
+        <button class="enlace enlace--peligro" type="button" data-cancelar="${esc(pedido.numero)}">Cancelar</button>
+      </div>
       <button class="accion ${paso.clase}" type="button" data-numero="${esc(pedido.numero)}" data-estado="${esc(paso.estado)}">${paso.texto}</button>
     </article>`;
 }
 
-function pintar(nuevos = new Set()) {
-  const sede = filtro.value;
-  const pedidos = datos.pedidos.filter((p) => !sede || p.sede === sede);
-  const avisos = datos.avisos.filter((a) => !a.atendido && (!sede || a.sede === sede || a.sede === "Sin definir"));
+function pintarPedidos(nuevos) {
+  const pedidos = delaSede(datos.pedidos);
+  const avisos = datos.avisos.filter((a) => !a.atendido && (!filtro.value || a.sede === filtro.value || a.sede === "Sin definir"));
 
   for (const [estado, columna] of Object.entries(COLUMNAS)) {
     // Los más antiguos arriba: es lo primero que hay que atender.
@@ -91,17 +103,26 @@ function pintar(nuevos = new Set()) {
     $(CONTADORES[estado]).textContent = lista.length;
   }
 
-  const entregados = pedidos.filter((p) => p.estado === "Entregado");
-  $("n-Entregado").textContent = entregados.length;
-  $("col-Entregado").innerHTML =
-    entregados
-      .map((p) => `<div class="fila"><button class="enlace" type="button" data-ver="${esc(p.numero)}"><strong>${esc(p.corto)}</strong></button><span>${esc(p.nombre)} · ${p.lineas.map((l) => `${l.cantidad}× ${esc(l.producto)}`).join(", ")}</span><span class="fila__hora">${hora(p.creado)}</span><span>${pesos(p.total)}</span></div>`)
-      .join("") || `<p class="vacio">Aún no se ha entregado ningún pedido.</p>`;
+  const cerrados = pedidos.filter((p) => CERRADOS.includes(p.estado));
+  $("n-cerrados").textContent = cerrados.length;
+  $("col-cerrados").innerHTML =
+    cerrados
+      .map((p) => `
+        <div class="fila${p.estado === "Cancelado" ? " fila--cancelado" : ""}">
+          <button class="enlace" type="button" data-ver="${esc(p.numero)}"><strong>${esc(p.corto)}</strong></button>
+          <span>${esc(p.nombre)} · ${p.lineas.map((l) => `${l.cantidad}× ${esc(l.producto)}`).join(", ")}${p.estado === "Cancelado" ? ` · Cancelado: ${esc(p.motivoCancelacion)}` : ""}</span>
+          <span class="fila__hora">${hora(p.creado)}</span>
+          <span>${pesos(p.total)}</span>
+        </div>`)
+      .join("") || `<p class="vacio">Aún no hay pedidos cerrados.</p>`;
 
-  $("c-nuevos").textContent = pedidos.filter((p) => p.estado === "Nuevo").length;
-  $("c-prep").textContent = pedidos.filter((p) => p.estado === "En preparación").length;
-  $("c-listos").textContent = pedidos.filter((p) => p.estado === "Listo").length;
-  $("c-ventas").textContent = pesos(pedidos.reduce((suma, p) => suma + p.total, 0));
+  const activos = pedidos.filter((p) => p.estado !== "Cancelado");
+  const cuenta = (estado) => pedidos.filter((p) => p.estado === estado).length;
+  $("c-nuevos").textContent = cuenta("Nuevo");
+  $("c-prep").textContent = cuenta("En preparación");
+  $("c-listos").textContent = cuenta("Listo");
+  $("c-ventas").textContent = pesos(activos.reduce((suma, p) => suma + p.total, 0));
+  $("t-pedidos").textContent = cuenta("Nuevo") + cuenta("En preparación") + cuenta("Listo");
 
   $("avisos-seccion").hidden = avisos.length === 0;
   $("n-avisos").textContent = avisos.length;
@@ -110,13 +131,115 @@ function pintar(nuevos = new Set()) {
       <div class="aviso">
         <strong>${esc(a.motivo)}</strong>
         <small>${hora(a.creado)} · ${esc(a.sede)} · ${esc(a.canal)} · ${esc(a.cliente)}</small>
-        <button class="enlace" type="button" data-ver-aviso="${esc(a.id)}">Ver conversación (${a.conversacion?.length ?? 0})</button>
+        <button class="enlace" type="button" data-ver-aviso="${esc(a.id)}">Ver y responder (${a.conversacion?.length ?? 0})</button>
         <button class="accion accion--suave" type="button" data-aviso="${esc(a.id)}">Marcar atendido</button>
       </div>`)
     .join("");
 
-  const pendientes = pedidos.filter((p) => p.estado === "Nuevo").length;
-  document.title = `${pendientes ? `(${pendientes}) ` : ""}Don Gil · Panel de sede`;
+  document.title = `${cuenta("Nuevo") ? `(${cuenta("Nuevo")}) ` : ""}Don Gil · Panel de sede`;
+}
+
+/* ---------- Resumen ---------- */
+
+function barras(id, filas, formato = pesos) {
+  const maximo = Math.max(1, ...filas.map(([, valor]) => valor));
+  $(id).innerHTML =
+    filas
+      .map(([nombre, valor]) => `
+        <div class="barra-fila">
+          <span class="barra-fila__nombre">${esc(nombre)}</span>
+          <span class="barra-fila__pista"><i style="width:${(valor / maximo) * 100}%"></i></span>
+          <span class="barra-fila__valor">${formato(valor)}</span>
+        </div>`)
+      .join("") || `<p class="vacio">Sin datos todavía.</p>`;
+}
+
+function agrupar(lista, clave, valor) {
+  const totales = new Map();
+  for (const item of lista) totales.set(clave(item), (totales.get(clave(item)) ?? 0) + valor(item));
+  return [...totales].sort((a, b) => b[1] - a[1]);
+}
+
+function pintarResumen() {
+  const pedidos = delaSede(datos.pedidos).filter((p) => p.estado !== "Cancelado");
+  const ventas = pedidos.reduce((suma, p) => suma + p.total, 0);
+  const entregados = pedidos.filter((p) => p.estado === "Entregado" && p.actualizado);
+  const minutos = entregados.map((p) => (new Date(p.actualizado) - new Date(p.creado)) / 60000);
+
+  $("r-ventas").textContent = pesos(ventas);
+  $("r-pedidos").textContent = pedidos.length;
+  $("r-ticket").textContent = pesos(pedidos.length ? ventas / pedidos.length : 0);
+  $("r-tiempo").textContent = minutos.length ? `${Math.max(1, Math.round(minutos.reduce((a, b) => a + b, 0) / minutos.length))} min` : "—";
+
+  const unidades = (n) => `${n} ${n === 1 ? "pedido" : "pedidos"}`;
+  barras("r-sedes", agrupar(pedidos, (p) => p.sede, (p) => p.total));
+  barras("r-productos", agrupar(pedidos.flatMap((p) => p.lineas), (l) => l.producto, (l) => l.cantidad).slice(0, 6), (n) => `${n} uds`);
+  barras("r-entrega", agrupar(pedidos, (p) => (p.entrega === "domicilio" ? "Domicilio" : "Recoger"), () => 1), unidades);
+  barras("r-canal", agrupar(pedidos, (p) => p.canal, () => 1), unidades);
+}
+
+/* ---------- Disponibilidad ---------- */
+
+function pintarCarta() {
+  if (!menu) return;
+  $("t-agotados").textContent = datos.agotados.length;
+  $("t-agotados").hidden = datos.agotados.length === 0;
+  $("carta").innerHTML = menu.categorias
+    .map((categoria) => `
+      <section class="tarjeta">
+        <h2>${esc(categoria.nombre)}</h2>
+        ${menu.productos
+          .filter((p) => p.cat === categoria.id)
+          .map((p) => {
+            const agotado = datos.agotados.includes(p.id);
+            return `<label class="interruptor${agotado ? " is-agotado" : ""}">
+              <span>${esc(p.nombre)}${agotado ? " <b>Agotado</b>" : ""}</span>
+              <input type="checkbox" data-producto="${esc(p.id)}" ${agotado ? "" : "checked"} aria-label="${esc(p.nombre)} disponible">
+            </label>`;
+          })
+          .join("")}
+      </section>`)
+    .join("");
+}
+
+/* ---------- Conversación ---------- */
+
+function registroAbierto() {
+  if (!abierta) return null;
+  return abierta.numero ? datos.pedidos.find((p) => p.numero === abierta.numero) : datos.avisos.find((a) => a.id === abierta.aviso);
+}
+
+function pintarConversacion() {
+  const registro = registroAbierto();
+  if (!registro) return;
+  $("conv-titulo").textContent = abierta.numero ? `Pedido ${registro.corto}` : "Aviso para el equipo";
+  $("conv-subtitulo").textContent = abierta.numero ? `${registro.nombre} · ${registro.sede} · ${registro.canal}` : `${registro.sede} · ${registro.canal} · ${registro.cliente}`;
+  const etiqueta = (m) => (m.manual ? "<small>Escrito por la sede</small>" : m.automatico ? "<small>Aviso automático de la sede</small>" : "");
+  const clase = (m) => (m.role === "user" ? "msg--cliente" : m.manual || m.automatico ? "msg--sede" : "msg--agente");
+  const caja = $("conv-mensajes");
+  const alFinal = caja.scrollHeight - caja.scrollTop - caja.clientHeight < 40;
+  caja.innerHTML =
+    (registro.conversacion ?? []).map((m) => `<div class="msg ${clase(m)}">${etiqueta(m)}${esc(m.content)}</div>`).join("") ||
+    `<p class="vacio">No hay conversación guardada.</p>`;
+  if (alFinal) caja.scrollTop = caja.scrollHeight;
+}
+
+function abrirConversacion(cual) {
+  abierta = cual;
+  if (!registroAbierto()) return;
+  dialogo.showModal();
+  pintarConversacion();
+  $("conv-mensajes").scrollTop = $("conv-mensajes").scrollHeight;
+}
+
+/* ---------- Datos ---------- */
+
+function pintar(nuevos = new Set()) {
+  pintarPedidos(nuevos);
+  pintarResumen();
+  // La carta no se repinta mientras alguien la está tocando.
+  if (!$("carta").contains(document.activeElement)) pintarCarta();
+  if (dialogo.open) pintarConversacion();
 }
 
 async function cargar() {
@@ -138,45 +261,69 @@ async function cargar() {
 }
 
 async function enviar(cuerpo, boton) {
-  boton.disabled = true;
+  if (boton) boton.disabled = true;
   try {
     const respuesta = await fetch("/api/orders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(cuerpo) });
     if (!respuesta.ok) throw new Error(respuesta.status);
   } catch {
-    boton.textContent = "No se pudo guardar. Toque de nuevo";
-    boton.disabled = false;
-    return;
+    if (boton) {
+      boton.textContent = "No se pudo guardar. Toque de nuevo";
+      boton.disabled = false;
+    }
+    return false;
   }
   await cargar();
+  return true;
 }
 
-const dialogo = $("conversacion");
-
-function verConversacion(titulo, subtitulo, conversacion = []) {
-  $("conv-titulo").textContent = titulo;
-  $("conv-subtitulo").textContent = subtitulo;
-  $("conv-mensajes").innerHTML =
-    conversacion.map((m) => `<div class="msg ${m.role === "user" ? "msg--cliente" : m.automatico ? "msg--sede" : "msg--agente"}">${m.automatico ? "<small>Aviso automático de la sede</small>" : ""}${esc(m.content)}</div>`).join("") ||
-    `<p class="vacio">Este pedido no tiene conversación guardada.</p>`;
-  dialogo.showModal();
-  $("conv-mensajes").scrollTop = 0;
-}
-$("conv-cerrar").addEventListener("click", () => dialogo.close());
-dialogo.addEventListener("click", (evento) => evento.target === dialogo && dialogo.close());
+/* ---------- Eventos ---------- */
 
 document.querySelector("main").addEventListener("click", (evento) => {
-  const ver = evento.target.closest("button[data-ver], button[data-ver-aviso]");
-  if (ver) {
-    const pedido = datos.pedidos.find((p) => p.numero === ver.dataset.ver);
-    const aviso = datos.avisos.find((a) => a.id === ver.dataset.verAviso);
-    if (pedido) verConversacion(`Pedido ${pedido.corto}`, `${pedido.nombre} · ${pedido.sede} · ${pedido.canal}`, pedido.conversacion);
-    if (aviso) verConversacion("Aviso para el equipo", `${aviso.sede} · ${aviso.canal} · ${aviso.cliente}`, aviso.conversacion);
-    return;
-  }
-  const boton = evento.target.closest("button[data-numero], button[data-aviso]");
+  const boton = evento.target.closest("button");
   if (!boton) return;
-  if (boton.dataset.aviso) enviar({ aviso: boton.dataset.aviso }, boton);
-  else enviar({ numero: boton.dataset.numero, estado: boton.dataset.estado }, boton);
+  const d = boton.dataset;
+  if (d.ver) abrirConversacion({ numero: d.ver });
+  else if (d.verAviso) abrirConversacion({ aviso: d.verAviso });
+  else if (d.cancelar) {
+    porCancelar = d.cancelar;
+    $("cancelar-titulo").textContent = `Cancelar pedido ${datos.pedidos.find((p) => p.numero === porCancelar)?.corto ?? ""}`;
+    dialogoCancelar.showModal();
+  } else if (d.aviso) enviar({ aviso: d.aviso }, boton);
+  else if (d.numero) enviar({ numero: d.numero, estado: d.estado }, boton);
+});
+
+$("carta").addEventListener("change", async (evento) => {
+  const casilla = evento.target.closest("input[data-producto]");
+  if (!casilla) return;
+  await enviar({ producto: casilla.dataset.producto, agotado: !casilla.checked });
+  pintarCarta();
+});
+
+$("conv-form").addEventListener("submit", async (evento) => {
+  evento.preventDefault();
+  const entrada = $("conv-entrada");
+  const mensaje = entrada.value.trim();
+  if (!mensaje || !abierta) return;
+  entrada.value = "";
+  const enviado = await enviar({ ...abierta, mensaje });
+  if (!enviado) entrada.value = mensaje;
+  $("conv-mensajes").scrollTop = $("conv-mensajes").scrollHeight;
+});
+$("conv-cerrar").addEventListener("click", () => dialogo.close());
+dialogo.addEventListener("click", (evento) => evento.target === dialogo && dialogo.close());
+dialogo.addEventListener("close", () => (abierta = null));
+
+$("cancelar-no").addEventListener("click", () => dialogoCancelar.close());
+$("cancelar-form").addEventListener("submit", () => {
+  if (porCancelar) enviar({ numero: porCancelar, estado: "Cancelado", motivo: $("cancelar-motivo").value });
+  porCancelar = null;
+});
+
+document.querySelector(".pestanas").addEventListener("click", (evento) => {
+  const pestana = evento.target.closest("button[data-vista]");
+  if (!pestana) return;
+  for (const otra of document.querySelectorAll(".pestanas button")) otra.setAttribute("aria-selected", otra === pestana);
+  for (const vista of document.querySelectorAll(".vista")) vista.hidden = vista.id !== `vista-${pestana.dataset.vista}`;
 });
 
 botonSonido.addEventListener("click", () => {
@@ -200,7 +347,8 @@ filtro.addEventListener("change", () => {
 
 fetch("/api/menu")
   .then((r) => r.json())
-  .then((menu) => {
+  .then((respuesta) => {
+    menu = respuesta;
     for (const sede of menu.sedes) filtro.add(new Option(sede.nombre, sede.nombre));
     filtro.value = recordar("don-gil-sede") ?? "";
     pintar();
@@ -209,4 +357,3 @@ fetch("/api/menu")
 
 cargar();
 setInterval(cargar, INTERVALO_MS);
-setInterval(() => pintar(), 30000); // refresca los "hace X min"

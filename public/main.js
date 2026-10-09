@@ -37,8 +37,9 @@ function pintarControles() {
 
 function tarjetaPlato(producto) {
   const precio = producto.precio[estado.sede.lista];
+  const agotado = estado.menu.agotados?.includes(producto.id);
   const tarjeta = document.createElement("article");
-  tarjeta.className = "plato";
+  tarjeta.className = agotado ? "plato is-agotado" : "plato";
   tarjeta.innerHTML = `
     ${arteDe(producto, "plato__arte")}
     <h3></h3>
@@ -51,6 +52,10 @@ function tarjetaPlato(producto) {
   $("p", tarjeta).textContent = producto.desc;
   $(".plato__pedir", tarjeta).setAttribute("aria-label", `Pedir ${producto.nombre}`);
   $(".plato__pedir", tarjeta).addEventListener("click", () => pedir(producto));
+  if (agotado) {
+    $(".plato__pedir", tarjeta).disabled = true;
+    $(".precio", tarjeta).textContent = "Agotado hoy";
+  }
   return tarjeta;
 }
 
@@ -67,7 +72,7 @@ function pintarGrilla(animar = true) {
 function pintarAntojos() {
   const pista = $("#antojos-pista");
   pista.querySelectorAll(".antojo").forEach((n) => n.remove());
-  for (const producto of estado.menu.productos.filter((p) => p.destacado)) {
+  for (const producto of estado.menu.productos.filter((p) => p.destacado && !estado.menu.agotados?.includes(p.id))) {
     const tarjeta = document.createElement("article");
     tarjeta.className = "antojo";
     tarjeta.innerHTML = `

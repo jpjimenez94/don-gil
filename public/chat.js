@@ -16,6 +16,8 @@
 
   const historial = [];
   const misPedidos = new Map(); // número de pedido -> último estado que el cliente ya vio
+  const misAvisos = new Set(); // avisos pasados a una persona en esta conversación
+  const manualesVistos = new Map(); // pedido o aviso -> cuántos mensajes de la sede ya se mostraron
   let ocupado = false;
   mensajes.setAttribute("data-lenis-prevent", "");
 
@@ -123,6 +125,7 @@
         tarjetaPedido(datos.pedido);
         misPedidos.set(datos.pedido.numero, datos.pedido.estado);
       }
+      if (datos.aviso) misAvisos.add(datos.aviso.id);
     } catch (error) {
       quitar();
       historial.pop();
@@ -134,18 +137,28 @@
     }
   }
 
-  // Cuando la sede mueve el pedido en el panel, el cliente recibe el aviso aquí.
+  async function mostrarDeLaSede(texto) {
+    historial.push({ role: "assistant", content: texto });
+    await escribirComoPersona(texto);
+    if (!chat.classList.contains("is-abierto")) burbuja.classList.add("is-aviso");
+  }
+
+  // Cuando la sede mueve el pedido en el panel o le escribe al cliente, el mensaje llega aquí.
   async function consultarEstados() {
-    const pendientes = [...misPedidos].filter(([, estado]) => estado !== "Entregado").map(([numero]) => numero);
-    if (!pendientes.length || ocupado) return;
+    if ((!misPedidos.size && !misAvisos.size) || ocupado) return;
     try {
-      const { pedidos } = await fetch(`/api/estado?numeros=${pendientes.join(",")}`).then((r) => r.json());
+      const consulta = new URLSearchParams({ numeros: [...misPedidos.keys()].join(","), avisos: [...misAvisos].join(",") });
+      const { pedidos, avisos } = await fetch(`/api/estado?${consulta}`).then((r) => r.json());
       for (const pedido of pedidos) {
-        if (misPedidos.get(pedido.numero) === pedido.estado || !pedido.mensaje) continue;
-        misPedidos.set(pedido.numero, pedido.estado);
-        historial.push({ role: "assistant", content: pedido.mensaje });
-        await escribirComoPersona(pedido.mensaje);
-        if (!chat.classList.contains("is-abierto")) burbuja.classList.add("is-aviso");
+        if (misPedidos.get(pedido.numero) !== pedido.estado && pedido.mensaje) {
+          misPedidos.set(pedido.numero, pedido.estado);
+          await mostrarDeLaSede(pedido.mensaje);
+        }
+      }
+      const conManuales = [...pedidos.map((p) => [p.numero, p.manuales]), ...avisos.map((a) => [a.id, a.manuales])];
+      for (const [clave, manuales] of conManuales) {
+        for (const texto of manuales.slice(manualesVistos.get(clave) ?? 0)) await mostrarDeLaSede(texto);
+        manualesVistos.set(clave, manuales.length);
       }
     } catch {
       // sin conexión: se reintenta en el siguiente ciclo

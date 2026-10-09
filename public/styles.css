@@ -273,3 +273,8 @@ img.chat__avatar { object-fit: cover; }
 .burbuja.is-aviso::after { content: ""; position: absolute; top: -2px; right: -2px; width: 16px; height: 16px; border-radius: 50%; background: #e23d28; border: 3px solid #fff; }
 .burbuja.is-aviso { animation: salta 1s ease 3; }
 @keyframes salta { 30% { transform: translateY(-8px); } 60% { transform: none; } }
+
+/* Producto agotado */
+.plato.is-agotado { opacity: 0.55; }
+.plato.is-agotado .precio { font-size: 1.1rem; color: var(--vino); }
+.plato.is-agotado .plato__pedir { visibility: hidden; }

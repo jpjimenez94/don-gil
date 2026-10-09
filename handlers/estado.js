@@ -1,11 +1,18 @@
-import { buscarPedido, mensajeDeEstado } from "../lib/store.js";
+import { buscarPedido, buscarAviso, mensajeDeEstado } from "../lib/store.js";
 
-// El chat de la demo pregunta aquí cómo van sus pedidos: GET /api/estado?numeros=DG-101,DG-102
+const lista = (valor) => String(valor ?? "").split(",").filter(Boolean).slice(0, 10);
+const manuales = (registro) => registro.conversacion.filter((m) => m.manual).map((m) => m.content);
+
+// El chat de la demo pregunta aquí cómo van sus pedidos y si la sede le escribió:
+// GET /api/estado?numeros=DG-101,DG-102&avisos=A-1
 export default function handler(req, res) {
-  const numeros = String(req.query?.numeros ?? "").split(",").filter(Boolean).slice(0, 10);
-  const pedidos = numeros
+  const pedidos = lista(req.query?.numeros)
     .map(buscarPedido)
     .filter(Boolean)
-    .map((p) => ({ numero: p.numero, estado: p.estado, mensaje: mensajeDeEstado(p) }));
-  return res.status(200).json({ pedidos });
+    .map((p) => ({ numero: p.numero, estado: p.estado, mensaje: mensajeDeEstado(p), manuales: manuales(p) }));
+  const avisos = lista(req.query?.avisos)
+    .map(buscarAviso)
+    .filter(Boolean)
+    .map((a) => ({ id: a.id, manuales: manuales(a) }));
+  return res.status(200).json({ pedidos, avisos });
 }

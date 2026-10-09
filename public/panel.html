@@ -25,38 +25,70 @@
     <button class="sonido" id="sonido" type="button" aria-pressed="false">Sonido: apagado</button>
   </header>
 
+  <nav class="pestanas" role="tablist" aria-label="Secciones del panel">
+    <button role="tab" aria-selected="true" data-vista="pedidos">Pedidos <span class="cuenta" id="t-pedidos">0</span></button>
+    <button role="tab" aria-selected="false" data-vista="resumen">Resumen</button>
+    <button role="tab" aria-selected="false" data-vista="carta">Disponibilidad <span class="cuenta" id="t-agotados" hidden>0</span></button>
+  </nav>
+
   <main>
-    <section class="cifras" aria-label="Resumen">
-      <div class="cifra"><strong id="c-nuevos">0</strong><span>Nuevos</span></div>
-      <div class="cifra"><strong id="c-prep">0</strong><span>En preparación</span></div>
-      <div class="cifra"><strong id="c-listos">0</strong><span>Listos</span></div>
-      <div class="cifra cifra--ventas"><strong id="c-ventas">$0</strong><span>Vendido en pedidos</span></div>
-    </section>
+    <!-- Pedidos -->
+    <div class="vista" id="vista-pedidos">
+      <section class="cifras" aria-label="Resumen rápido">
+        <div class="cifra"><strong id="c-nuevos">0</strong><span>Nuevos</span></div>
+        <div class="cifra"><strong id="c-prep">0</strong><span>En preparación</span></div>
+        <div class="cifra"><strong id="c-listos">0</strong><span>Listos y en camino</span></div>
+        <div class="cifra cifra--ventas"><strong id="c-ventas">$0</strong><span>Vendido en pedidos</span></div>
+      </section>
 
-    <section class="avisos" id="avisos-seccion" hidden>
-      <h2>Avisos para el equipo <span class="cuenta" id="n-avisos">0</span></h2>
-      <div class="avisos__lista" id="avisos"></div>
-    </section>
+      <section class="avisos" id="avisos-seccion" hidden>
+        <h2>Avisos para el equipo <span class="cuenta" id="n-avisos">0</span></h2>
+        <div class="avisos__lista" id="avisos"></div>
+      </section>
 
-    <section class="tablero" aria-label="Pedidos">
-      <div class="columna" data-estado="Nuevo">
-        <h2>Nuevos <span class="cuenta" id="n-Nuevo">0</span></h2>
-        <div class="columna__lista" id="col-Nuevo"></div>
-      </div>
-      <div class="columna" data-estado="En preparación">
-        <h2>En preparación <span class="cuenta" id="n-prep">0</span></h2>
-        <div class="columna__lista" id="col-prep"></div>
-      </div>
-      <div class="columna" data-estado="Listo">
-        <h2>Listos y en camino <span class="cuenta" id="n-Listo">0</span></h2>
-        <div class="columna__lista" id="col-Listo"></div>
-      </div>
-    </section>
+      <section class="tablero" aria-label="Pedidos">
+        <div class="columna">
+          <h2>Nuevos <span class="cuenta" id="n-Nuevo">0</span></h2>
+          <div class="columna__lista" id="col-Nuevo"></div>
+        </div>
+        <div class="columna">
+          <h2>En preparación <span class="cuenta" id="n-prep">0</span></h2>
+          <div class="columna__lista" id="col-prep"></div>
+        </div>
+        <div class="columna">
+          <h2>Listos y en camino <span class="cuenta" id="n-Listo">0</span></h2>
+          <div class="columna__lista" id="col-Listo"></div>
+        </div>
+      </section>
 
-    <details class="entregados">
-      <summary>Entregados <span class="cuenta" id="n-Entregado">0</span></summary>
-      <div class="entregados__lista" id="col-Entregado"></div>
-    </details>
+      <details class="entregados">
+        <summary>Entregados y cancelados <span class="cuenta" id="n-cerrados">0</span></summary>
+        <div class="entregados__lista" id="col-cerrados"></div>
+      </details>
+    </div>
+
+    <!-- Resumen para el dueño -->
+    <div class="vista" id="vista-resumen" hidden>
+      <section class="cifras" aria-label="Indicadores">
+        <div class="cifra cifra--ventas"><strong id="r-ventas">$0</strong><span>Ventas</span></div>
+        <div class="cifra"><strong id="r-pedidos">0</strong><span>Pedidos</span></div>
+        <div class="cifra"><strong id="r-ticket">$0</strong><span>Pedido promedio</span></div>
+        <div class="cifra"><strong id="r-tiempo">—</strong><span>Tiempo promedio hasta entregar</span></div>
+      </section>
+      <div class="graficas">
+        <section class="tarjeta"><h2>Ventas por sede</h2><div class="barras" id="r-sedes"></div></section>
+        <section class="tarjeta"><h2>Lo más pedido</h2><div class="barras" id="r-productos"></div></section>
+        <section class="tarjeta"><h2>Domicilio o recoger</h2><div class="barras" id="r-entrega"></div></section>
+        <section class="tarjeta"><h2>Por dónde llegan</h2><div class="barras" id="r-canal"></div></section>
+      </div>
+      <p class="nota">El resumen sale de los pedidos que hay en el panel y respeta el filtro de sede. No cuenta los cancelados.</p>
+    </div>
+
+    <!-- Disponibilidad -->
+    <div class="vista" id="vista-carta" hidden>
+      <p class="nota">Apague lo que se acabó. El asistente deja de ofrecerlo en el siguiente mensaje y la página lo muestra como agotado. Aplica para todas las sedes.</p>
+      <div class="carta" id="carta"></div>
+    </div>
   </main>
 
   <dialog class="conv" id="conversacion" aria-labelledby="conv-titulo">
@@ -65,6 +97,29 @@
       <button type="button" id="conv-cerrar" aria-label="Cerrar">×</button>
     </header>
     <div class="conv__mensajes" id="conv-mensajes"></div>
+    <form class="conv__form" id="conv-form">
+      <input id="conv-entrada" type="text" autocomplete="off" maxlength="500" placeholder="Escribirle al cliente" aria-label="Mensaje para el cliente">
+      <button type="submit">Enviar</button>
+    </form>
+  </dialog>
+
+  <dialog class="conv conv--chico" id="cancelar" aria-labelledby="cancelar-titulo">
+    <header class="conv__cabeza conv__cabeza--vino">
+      <div><strong id="cancelar-titulo">Cancelar pedido</strong><small>Se le avisa al cliente con el motivo.</small></div>
+    </header>
+    <form class="cancelar__form" id="cancelar-form" method="dialog">
+      <label for="cancelar-motivo">Motivo</label>
+      <select id="cancelar-motivo">
+        <option>se nos agotó el producto</option>
+        <option>no alcanzamos a llegar a esa dirección</option>
+        <option>la sede ya cerró</option>
+        <option>el cliente pidió cancelarlo</option>
+      </select>
+      <div class="cancelar__botones">
+        <button type="button" class="accion accion--suave" id="cancelar-no">Volver</button>
+        <button type="submit" class="accion accion--peligro">Cancelar pedido</button>
+      </div>
+    </form>
   </dialog>
 
   <script src="panel.js"></script>

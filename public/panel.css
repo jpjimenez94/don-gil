@@ -113,3 +113,49 @@ h2 { font-family: var(--display); font-weight: 400; font-size: 1.2rem; color: va
 .msg--agente { background: #d9fdd3; align-self: flex-end; border-top-right-radius: 0.2rem; }
 .msg--sede { background: var(--amarillo-claro); align-self: flex-end; border-top-right-radius: 0.2rem; }
 .msg--sede small { display: block; font-weight: 700; font-size: 0.7rem; opacity: 0.7; margin-bottom: 0.15rem; }
+
+/* Pestañas */
+.pestanas { display: flex; gap: 0.4rem; padding: 0.7rem clamp(0.8rem, 3vw, 1.6rem) 0; max-width: 1400px; margin: 0 auto; overflow-x: auto; }
+.pestanas button { padding: 0.6rem 1.1rem; border-radius: 999px; background: rgba(91, 29, 20, 0.08); color: var(--vino); font-weight: 700; white-space: nowrap; display: inline-flex; align-items: center; gap: 0.4rem; }
+.pestanas button[aria-selected="true"] { background: var(--vino); color: var(--crema); }
+.pestanas button[aria-selected="true"] .cuenta { background: var(--amarillo); color: var(--vino); }
+.vista { display: grid; gap: 1.2rem; }
+.vista[hidden] { display: none; }
+.nota { font-size: 0.9rem; opacity: 0.7; }
+
+/* Resumen */
+.graficas { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+.tarjeta { background: #fff; border-radius: 18px; padding: 1rem 1.1rem; }
+.barras { display: grid; gap: 0.55rem; margin-top: 0.8rem; }
+.barra-fila { display: grid; grid-template-columns: minmax(90px, 1.2fr) 2fr auto; gap: 0.7rem; align-items: center; font-size: 0.9rem; }
+.barra-fila__pista { height: 12px; border-radius: 999px; background: rgba(91, 29, 20, 0.08); overflow: hidden; }
+.barra-fila__pista i { display: block; height: 100%; border-radius: 999px; background: var(--naranja); transition: width 0.5s ease; }
+.barra-fila__valor { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Disponibilidad */
+.carta { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; align-items: start; }
+.interruptor { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.6rem 0; border-bottom: 1px dashed #d8cdb6; cursor: pointer; }
+.interruptor:last-child { border-bottom: 0; }
+.interruptor b { font-size: 0.72rem; background: #d6452f; color: #fff; border-radius: 999px; padding: 0.05rem 0.5rem; margin-left: 0.3rem; }
+.interruptor.is-agotado > span { opacity: 0.6; }
+.interruptor input { appearance: none; width: 46px; height: 26px; border-radius: 999px; background: #cfc5b0; position: relative; cursor: pointer; flex: none; transition: background 0.2s ease; }
+.interruptor input::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: transform 0.2s ease; }
+.interruptor input:checked { background: var(--verde); }
+.interruptor input:checked::after { transform: translateX(20px); }
+
+/* Enlaces de la tarjeta, cancelación y respuesta */
+.pedido__enlaces { display: flex; justify-content: space-between; gap: 1rem; }
+.enlace--peligro { color: #b3321f; }
+.accion--peligro { background: #b3321f; }
+.accion--peligro:hover { background: #8f2617; }
+.fila--cancelado { opacity: 0.6; }
+.fila--cancelado strong { text-decoration: line-through; }
+.conv__form { display: flex; gap: 0.5rem; padding: 0.6rem 0.8rem 0.8rem; }
+.conv__form input { flex: 1; min-width: 0; border: 0; border-radius: 999px; padding: 0.7rem 1rem; font: inherit; background: #fff; }
+.conv__form button { padding: 0 1.1rem; border-radius: 999px; background: #075e54; color: #fff; font-weight: 700; }
+.conv--chico { width: min(400px, calc(100vw - 1.6rem)); background: #fff; }
+.conv__cabeza--vino { background: var(--vino); }
+.cancelar__form { padding: 1rem; display: grid; gap: 0.6rem; }
+.cancelar__form select { padding: 0.7rem; border-radius: 12px; border: 2px solid #d8cdb6; width: 100%; }
+.cancelar__botones { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-top: 0.4rem; }
+@media (max-width: 900px) { .graficas { grid-template-columns: 1fr; } }
