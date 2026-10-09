@@ -9,13 +9,13 @@ npm install
 ```
 
 ```bash
-ANTHROPIC_API_KEY=su_clave npm run dev
+npm run dev
 ```
 
 - Página: http://localhost:3000
 - Panel de sede (celular o tableta): http://localhost:3000/panel.html
 
-Sin `ANTHROPIC_API_KEY` la página funciona, pero el chat responde que falta la clave.
+La clave va en un archivo `.env` (copie `.env.example`); git lo ignora. Sin `ANTHROPIC_API_KEY` la página funciona, pero el chat responde que falta la clave.
 
 ## Qué hay
 
