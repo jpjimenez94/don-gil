@@ -1,0 +1,96 @@
+:root {
+  --amarillo: #ffcf1f;
+  --amarillo-claro: #ffe27a;
+  --crema: #fff6dc;
+  --vino: #5b1d14;
+  --vino-oscuro: #3a110b;
+  --naranja: #e9772b;
+  --verde: #1f8a4c;
+  --tinta: #2a120d;
+  --display: "Lilita One", system-ui, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; }
+body { font-family: "DM Sans", system-ui, sans-serif; background: var(--crema); color: var(--tinta); min-height: 100vh; }
+button, select { font: inherit; }
+button { cursor: pointer; border: 0; }
+:focus-visible { outline: 3px solid var(--naranja); outline-offset: 2px; }
+
+/* Barra superior */
+.barra { position: sticky; top: 0; z-index: 5; background: var(--vino); color: var(--crema); display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; padding: 0.7rem clamp(0.8rem, 3vw, 1.6rem); }
+.barra__logo { line-height: 0; }
+.barra__logo img { border-radius: 50%; }
+.barra__titulo { flex: 1; min-width: 150px; }
+.barra h1 { font-family: var(--display); font-weight: 400; font-size: 1.35rem; line-height: 1.1; }
+.vivo { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; opacity: 0.9; }
+.vivo i { width: 9px; height: 9px; border-radius: 50%; background: #4ade80; animation: late 1.4s infinite; }
+.vivo.is-caido i { background: #f87171; animation: none; }
+@keyframes late { 50% { opacity: 0.3; } }
+.campo { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; }
+.campo select { padding: 0.5rem 0.8rem; border-radius: 999px; border: 0; background: var(--crema); color: var(--vino); font-weight: 700; }
+.sonido { padding: 0.5rem 0.9rem; border-radius: 999px; background: rgba(255, 255, 255, 0.14); color: var(--crema); font-size: 0.85rem; }
+.sonido[aria-pressed="true"] { background: var(--amarillo); color: var(--vino); font-weight: 700; }
+
+main { padding: clamp(0.8rem, 3vw, 1.6rem); max-width: 1400px; margin: 0 auto; display: grid; gap: 1.2rem; }
+h2 { font-family: var(--display); font-weight: 400; font-size: 1.2rem; color: var(--vino); display: flex; align-items: center; gap: 0.5rem; }
+.cuenta { font-family: "DM Sans", sans-serif; font-size: 0.8rem; font-weight: 700; background: var(--vino); color: var(--crema); border-radius: 999px; padding: 0.05rem 0.55rem; }
+
+/* Cifras */
+.cifras { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; }
+.cifra { background: #fff; border-radius: 16px; padding: 0.9rem 1rem; }
+.cifra strong { display: block; font-family: var(--display); font-weight: 400; font-size: clamp(1.6rem, 4vw, 2.4rem); line-height: 1; color: var(--vino); font-variant-numeric: tabular-nums; }
+.cifra span { font-size: 0.85rem; opacity: 0.75; }
+.cifra--ventas { background: var(--amarillo); }
+
+/* Avisos */
+.avisos { background: #fff; border: 2px solid var(--naranja); border-radius: 18px; padding: 1rem; }
+.avisos__lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.7rem; margin-top: 0.7rem; }
+.aviso { background: #fff1e6; border-radius: 14px; padding: 0.8rem; display: grid; gap: 0.3rem; font-size: 0.92rem; }
+.aviso small { opacity: 0.65; }
+
+/* Tablero */
+.tablero { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; align-items: start; }
+.columna { background: rgba(91, 29, 20, 0.06); border-radius: 18px; padding: 0.8rem; min-height: 180px; }
+.columna__lista { display: grid; gap: 0.7rem; margin-top: 0.7rem; }
+.vacio { font-size: 0.9rem; opacity: 0.55; padding: 1.2rem 0.4rem; text-align: center; }
+
+.pedido { background: #fff; border-radius: 16px; padding: 0.9rem; border-top: 6px solid var(--amarillo); display: grid; gap: 0.5rem; box-shadow: 0 8px 18px -14px rgba(58, 17, 11, 0.6); }
+.pedido.is-nuevo { animation: llega 0.6s ease, resalta 2.4s ease; }
+.pedido.is-demorado { border-top-color: #d6452f; }
+@keyframes llega { from { transform: translateY(-14px) scale(0.97); opacity: 0; } }
+@keyframes resalta { 0%, 60% { box-shadow: 0 0 0 4px var(--amarillo); } }
+.pedido__cabeza { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; }
+.pedido__numero { font-family: var(--display); font-size: 1.35rem; color: var(--vino); }
+.pedido__tiempo { font-size: 0.8rem; opacity: 0.7; white-space: nowrap; }
+.pedido.is-demorado .pedido__tiempo { color: #b3321f; font-weight: 700; opacity: 1; }
+.chips { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+.chip { padding: 0.12rem 0.6rem; border-radius: 999px; background: var(--amarillo-claro); font-size: 0.74rem; font-weight: 700; }
+.chip--domi { background: var(--vino); color: var(--crema); }
+.pedido ul { list-style: none; padding: 0; border-top: 1px dashed #d8cdb6; }
+.pedido li { display: flex; justify-content: space-between; gap: 0.6rem; padding: 0.3rem 0; border-bottom: 1px dashed #d8cdb6; }
+.pedido li b { font-family: var(--display); font-weight: 400; color: var(--naranja); margin-right: 0.3rem; }
+.total { display: flex; justify-content: space-between; font-weight: 700; }
+.dato { font-size: 0.88rem; }
+.dato b { opacity: 0.6; font-weight: 500; }
+.accion { margin-top: 0.2rem; padding: 0.75rem; border-radius: 12px; background: var(--vino); color: var(--crema); font-weight: 700; width: 100%; transition: background 0.2s ease, transform 0.15s ease; }
+.accion:hover { background: var(--vino-oscuro); }
+.accion:active { transform: scale(0.98); }
+.accion--listo { background: var(--verde); }
+.accion--suave { background: rgba(91, 29, 20, 0.1); color: var(--vino); }
+.accion:disabled { opacity: 0.5; cursor: default; }
+
+/* Entregados */
+.entregados { background: #fff; border-radius: 18px; padding: 0.9rem 1rem; }
+.entregados summary { cursor: pointer; font-family: var(--display); font-size: 1.1rem; color: var(--vino); display: flex; align-items: center; gap: 0.5rem; }
+.entregados__lista { margin-top: 0.7rem; display: grid; gap: 0.3rem; }
+.fila { display: grid; grid-template-columns: 5.5rem 1fr auto auto; gap: 0.8rem; align-items: baseline; padding: 0.45rem 0; border-bottom: 1px dashed #d8cdb6; font-size: 0.9rem; }
+.fila strong { font-family: var(--display); font-weight: 400; color: var(--vino); }
+
+@media (max-width: 900px) {
+  .tablero { grid-template-columns: 1fr; }
+  .cifras { grid-template-columns: repeat(2, 1fr); }
+  .fila { grid-template-columns: 5rem 1fr auto; }
+  .fila .fila__hora { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pedido.is-nuevo, .vivo i { animation: none; }
+}
