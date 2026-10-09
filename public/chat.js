@@ -67,7 +67,15 @@
     mensajes.scrollTop = mensajes.scrollHeight;
   }
 
+  // Con el número real configurado, los botones llevan al WhatsApp del cliente con el mensaje ya escrito.
+  // El chat de la página es solo para la demostración.
   function abrir(mensaje) {
+    const numero = window.donGilWhatsApp;
+    if (numero) {
+      const texto = encodeURIComponent(mensaje || "Hola, quiero hacer un pedido");
+      window.open(`https://wa.me/${numero}?text=${texto}`, "_blank", "noopener");
+      return;
+    }
     chat.classList.add("is-abierto");
     chat.setAttribute("aria-hidden", "false");
     burbuja.classList.add("is-oculta");

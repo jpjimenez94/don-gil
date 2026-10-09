@@ -271,6 +271,7 @@ function botonesMagneticos() {
 async function iniciar() {
   estado.menu = await fetch("/api/menu").then((r) => r.json());
   estado.sede = estado.menu.sedes[0];
+  window.donGilWhatsApp = estado.menu.marca.whatsapp_pedidos;
   pintarControles();
   pintarGrilla(false);
   pintarAntojos();

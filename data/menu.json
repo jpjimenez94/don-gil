@@ -5,7 +5,9 @@
     "lema": "50 años con la tradición de Papá",
     "pago": "Contra entrega",
     "instagram": "https://www.instagram.com/dongilempanaditasybunuelitos/",
-    "tiktok": "https://www.tiktok.com/@dongilempanaditas"
+    "tiktok": "https://www.tiktok.com/@dongilempanaditas",
+    "whatsapp_pedidos": null,
+    "_nota_whatsapp": "Número único de pedidos con indicativo, solo dígitos (ej. 573001234567). Mientras sea null, los botones abren el chat de demostración de la página; con un número, abren WhatsApp con el mensaje ya escrito."
   },
   "sedes": [
     {
