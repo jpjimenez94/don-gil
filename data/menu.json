@@ -1,5 +1,5 @@
 {
-  "_nota": "Lista maestra de precios. La leen la página y el agente. Fuente: historia destacada 'Precios' de Instagram (carta publicada por Don Gil). 'calle' = Jamundí, Bochalema y San Nicolás; 'cc' = Palmetto y San Fernando.",
+  "_nota": "Lista maestra de precios. La leen la página y el agente. Fuente: historia destacada 'Precios' de Instagram (carta publicada por Don Gil). 'calle' = Jamundí, Bochalema y San Nicolás; 'cc' = Palmetto y San Fernando. Las fotos son imágenes de referencia tomadas de Rappi: provisionales hasta tener las originales de Don Gil.",
   "marca": {
     "nombre": "Don Gil",
     "lema": "50 años con la tradición de Papá",
@@ -50,37 +50,48 @@
     }
   ],
   "categorias": [
-    { "id": "empanadas", "nombre": "Empanadas" },
-    { "id": "combos", "nombre": "Combos y kilo" },
-    { "id": "bunuelos", "nombre": "Buñuelos y pandebonos" },
-    { "id": "aborrajados", "nombre": "Aborrajados" },
-    { "id": "bebidas", "nombre": "Bebidas" }
+    {
+      "id": "empanadas",
+      "nombre": "Empanadas"
+    },
+    {
+      "id": "combos",
+      "nombre": "Combos y kilo"
+    },
+    {
+      "id": "bunuelos",
+      "nombre": "Buñuelos y pandebonos"
+    },
+    {
+      "id": "aborrajados",
+      "nombre": "Aborrajados"
+    },
+    {
+      "id": "bebidas",
+      "nombre": "Bebidas"
+    }
   ],
   "productos": [
-    { "id": "empanada", "cat": "empanadas", "nombre": "Empanadita", "desc": "La de siempre: crocantica y bien cargadita.", "precio": { "calle": 1000, "cc": 1000 }, "arte": "empanada" },
-    { "id": "empanadas-3", "cat": "empanadas", "nombre": "3 empanadas", "desc": "Pa' abrir el apetito.", "precio": { "calle": 2900, "cc": 3300 }, "arte": "empanada" },
-    { "id": "empanadas-5", "cat": "empanadas", "nombre": "5 empanadas", "desc": "La media mañana resuelta.", "precio": { "calle": 4700, "cc": 5300 }, "arte": "empanada" },
-    { "id": "empanadas-9", "cat": "empanadas", "nombre": "9 empanadas", "desc": "Pa' compartir, si le nace.", "precio": { "calle": 8400, "cc": 9500 }, "arte": "empanada" },
-    { "id": "empanadas-20", "cat": "empanadas", "nombre": "20 empanadas", "desc": "Pa' la oficina o la visita.", "precio": { "calle": 18500, "cc": 21000 }, "arte": "empanada" },
-
-    { "id": "combo-don-gil", "cat": "combos", "nombre": "Combo Don Gil", "desc": "12 empanadas + 2 aborrajados.", "precio": { "calle": 14900, "cc": 17800 }, "arte": "combo", "destacado": true },
-    { "id": "kilo", "cat": "combos", "nombre": "Kilo de empanadas", "desc": "65 unidades. Pa' mí, pa' ti, pa' todos.", "precio": { "calle": 54000, "cc": 59000 }, "arte": "caja", "destacado": true },
-
-    { "id": "bunuelo", "cat": "bunuelos", "nombre": "Buñuelo o pandebono", "desc": "Unidad, bien calientico.", "precio": { "calle": 900, "cc": 900 }, "arte": "bunuelo" },
-    { "id": "bunuelos-3", "cat": "bunuelos", "nombre": "3 buñuelos o pandebonos", "desc": "Uno nunca es uno.", "precio": { "calle": 2500, "cc": 2500 }, "arte": "bunuelo" },
-    { "id": "conito", "cat": "bunuelos", "nombre": "Conito con arequipe", "desc": "3 pandebonos o buñuelos bañados en arequipe.", "precio": { "calle": 4200, "cc": 4200 }, "arte": "cono", "destacado": true },
-    { "id": "bunuelo-mozzarella", "cat": "bunuelos", "nombre": "Buñuelo de mozzarella", "desc": "Relleno de queso derretido.", "precio": { "calle": 2500, "cc": 2500 }, "arte": "bunuelo" },
-    { "id": "bunuelo-mozzarella-arequipe", "cat": "bunuelos", "nombre": "Buñuelo mozzarella + arequipe", "desc": "Una cosa de locos, pues.", "precio": { "calle": 3800, "cc": 3800 }, "arte": "bunuelo", "destacado": true },
-
-    { "id": "aborrajado", "cat": "aborrajados", "nombre": "Aborrajadito", "desc": "Maduro dulce relleno de queso.", "precio": { "calle": 2200, "cc": 2600 }, "arte": "aborrajado" },
-    { "id": "aborrajados-4", "cat": "aborrajados", "nombre": "4 aborrajaditos", "desc": "Pa' no pelear por el último.", "precio": { "calle": 7900, "cc": 9500 }, "arte": "aborrajado" },
-
-    { "id": "granizado", "cat": "bebidas", "nombre": "Granizado de fruta 24 oz", "desc": "Natural, bien frío.", "precio": { "calle": 7500, "cc": 7500 }, "arte": "vaso" },
-    { "id": "avena", "cat": "bebidas", "nombre": "Avena 14 oz", "desc": "Cremosa, de la casa.", "precio": { "calle": 6800, "cc": 6800 }, "arte": "vaso" },
-    { "id": "milo-9", "cat": "bebidas", "nombre": "Milo pequeño 9 oz", "desc": "", "precio": { "calle": 4400, "cc": 4400 }, "arte": "taza" },
-    { "id": "milo-14", "cat": "bebidas", "nombre": "Milo grande 14 oz", "desc": "", "precio": { "calle": 6200, "cc": 6200 }, "arte": "taza" },
-    { "id": "chocolate", "cat": "bebidas", "nombre": "Chocolate 9 oz", "desc": "", "precio": { "calle": 3500, "cc": 3500 }, "arte": "taza" },
-    { "id": "cafe-leche", "cat": "bebidas", "nombre": "Café con leche 6 oz", "desc": "", "precio": { "calle": 3200, "cc": 3200 }, "arte": "taza" },
-    { "id": "tinto", "cat": "bebidas", "nombre": "Tinto 6 oz", "desc": "", "precio": { "calle": 1900, "cc": 1900 }, "arte": "taza" }
+    { "id": "empanada", "cat": "empanadas", "nombre": "Empanadita", "desc": "La de siempre: crocantica y bien cargadita.", "precio": {"calle": 1000, "cc": 1000}, "arte": "empanada", "foto": "img/empanada.webp" },
+    { "id": "empanadas-3", "cat": "empanadas", "nombre": "3 empanadas", "desc": "Pa' abrir el apetito.", "precio": {"calle": 2900, "cc": 3300}, "arte": "empanada", "foto": "img/empanadas-3.webp" },
+    { "id": "empanadas-5", "cat": "empanadas", "nombre": "5 empanadas", "desc": "La media mañana resuelta.", "precio": {"calle": 4700, "cc": 5300}, "arte": "empanada", "foto": "img/empanadas-5.webp" },
+    { "id": "empanadas-9", "cat": "empanadas", "nombre": "9 empanadas", "desc": "Pa' compartir, si le nace.", "precio": {"calle": 8400, "cc": 9500}, "arte": "empanada", "foto": "img/empanadas-9.webp" },
+    { "id": "empanadas-20", "cat": "empanadas", "nombre": "20 empanadas", "desc": "Pa' la oficina o la visita.", "precio": {"calle": 18500, "cc": 21000}, "arte": "empanada", "foto": "img/empanadas-9.webp" },
+    { "id": "combo-don-gil", "cat": "combos", "nombre": "Combo Don Gil", "desc": "12 empanadas + 2 aborrajados.", "precio": {"calle": 14900, "cc": 17800}, "arte": "combo", "destacado": true, "foto": "img/aborrajados-4.webp" },
+    { "id": "kilo", "cat": "combos", "nombre": "Kilo de empanadas", "desc": "65 unidades. Pa' mí, pa' ti, pa' todos.", "precio": {"calle": 54000, "cc": 59000}, "arte": "caja", "destacado": true, "foto": "img/kilo.webp" },
+    { "id": "bunuelo", "cat": "bunuelos", "nombre": "Buñuelo o pandebono", "desc": "Unidad, bien calientico.", "precio": {"calle": 900, "cc": 900}, "arte": "bunuelo", "foto": "img/bunuelo.webp" },
+    { "id": "bunuelos-3", "cat": "bunuelos", "nombre": "3 buñuelos o pandebonos", "desc": "Uno nunca es uno.", "precio": {"calle": 2500, "cc": 2500}, "arte": "bunuelo", "foto": "img/bunuelos-3.webp" },
+    { "id": "conito", "cat": "bunuelos", "nombre": "Conito con arequipe", "desc": "3 pandebonos o buñuelos bañados en arequipe.", "precio": {"calle": 4200, "cc": 4200}, "arte": "cono", "destacado": true, "foto": "img/bunuelos-3.webp" },
+    { "id": "bunuelo-mozzarella", "cat": "bunuelos", "nombre": "Buñuelo de mozzarella", "desc": "Relleno de queso derretido.", "precio": {"calle": 2500, "cc": 2500}, "arte": "bunuelo", "foto": "img/bunuelo-crocante.webp" },
+    { "id": "bunuelo-mozzarella-arequipe", "cat": "bunuelos", "nombre": "Buñuelo mozzarella + arequipe", "desc": "Una cosa de locos, pues.", "precio": {"calle": 3800, "cc": 3800}, "arte": "bunuelo", "destacado": true, "foto": "img/bunuelo.webp" },
+    { "id": "aborrajado", "cat": "aborrajados", "nombre": "Aborrajadito", "desc": "Maduro dulce relleno de queso.", "precio": {"calle": 2200, "cc": 2600}, "arte": "aborrajado", "foto": "img/aborrajado.webp" },
+    { "id": "aborrajados-4", "cat": "aborrajados", "nombre": "4 aborrajaditos", "desc": "Pa' no pelear por el último.", "precio": {"calle": 7900, "cc": 9500}, "arte": "aborrajado", "foto": "img/aborrajados-4.webp" },
+    { "id": "granizado", "cat": "bebidas", "nombre": "Granizado de fruta 24 oz", "desc": "Natural, bien frío.", "precio": {"calle": 7500, "cc": 7500}, "arte": "vaso", "foto": "img/granizado.webp" },
+    { "id": "avena", "cat": "bebidas", "nombre": "Avena 14 oz", "desc": "Cremosa, de la casa.", "precio": {"calle": 6800, "cc": 6800}, "arte": "vaso", "foto": "img/avena.webp" },
+    { "id": "milo-9", "cat": "bebidas", "nombre": "Milo pequeño 9 oz", "desc": "", "precio": {"calle": 4400, "cc": 4400}, "arte": "taza" },
+    { "id": "milo-14", "cat": "bebidas", "nombre": "Milo grande 14 oz", "desc": "", "precio": {"calle": 6200, "cc": 6200}, "arte": "taza" },
+    { "id": "chocolate", "cat": "bebidas", "nombre": "Chocolate 9 oz", "desc": "", "precio": {"calle": 3500, "cc": 3500}, "arte": "taza" },
+    { "id": "cafe-leche", "cat": "bebidas", "nombre": "Café con leche 6 oz", "desc": "", "precio": {"calle": 3200, "cc": 3200}, "arte": "taza" },
+    { "id": "tinto", "cat": "bebidas", "nombre": "Tinto 6 oz", "desc": "", "precio": {"calle": 1900, "cc": 1900}, "arte": "taza" }
   ]
 }

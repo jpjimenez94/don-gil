@@ -3,6 +3,12 @@ const $ = (sel, raiz = document) => raiz.querySelector(sel);
 const sinMovimiento = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const hayGsap = typeof gsap !== "undefined" && typeof ScrollTrigger !== "undefined";
 
+// Foto real si el producto la tiene; si no, la ilustración.
+const arteDe = (producto, clase) =>
+  producto.foto
+    ? `<div class="${clase} ${clase}--foto"><img src="${producto.foto}" alt="" loading="lazy"></div>`
+    : `<div class="${clase}" data-arte="${producto.arte}"></div>`;
+
 const estado = { menu: null, sede: null, cat: "empanadas" };
 
 /* ---------- Menú: una sola lista maestra, precios según la sede ---------- */
@@ -34,7 +40,7 @@ function tarjetaPlato(producto) {
   const tarjeta = document.createElement("article");
   tarjeta.className = "plato";
   tarjeta.innerHTML = `
-    <div class="plato__arte" data-arte="${producto.arte}"></div>
+    ${arteDe(producto, "plato__arte")}
     <h3></h3>
     <p></p>
     <div class="plato__pie">
@@ -65,7 +71,7 @@ function pintarAntojos() {
     const tarjeta = document.createElement("article");
     tarjeta.className = "antojo";
     tarjeta.innerHTML = `
-      <div class="antojo__arte" data-arte="${producto.arte}"></div>
+      ${arteDe(producto, "antojo__arte")}
       <h3></h3>
       <p></p>
       <div class="antojo__pie">
@@ -201,7 +207,7 @@ function animarAntojos() {
         ease: "none",
         scrollTrigger: { trigger: ".antojos", start: "top top", end: () => "+=" + recorrido(), pin: true, scrub: 0.6, invalidateOnRefresh: true, anticipatePin: 1 },
       });
-      gsap.utils.toArray(".antojo__arte svg").forEach((arte) => {
+      gsap.utils.toArray(".antojo__arte svg, .antojo__arte img").forEach((arte) => {
         gsap.fromTo(arte, { rotate: -14, scale: 0.85 }, {
           rotate: 10, scale: 1.05, ease: "none",
           scrollTrigger: { trigger: arte, containerAnimation: tween, start: "left right", end: "right left", scrub: true },
