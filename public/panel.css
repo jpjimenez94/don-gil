@@ -168,3 +168,29 @@ h2 { font-family: var(--display); font-weight: 400; font-size: 1.2rem; color: va
 .columna-barra__valor { font-size: 0.7rem; font-weight: 700; min-height: 1em; }
 .columna-barra__pie { font-size: 0.66rem; opacity: 0.7; white-space: nowrap; }
 .columnas--dias .columna-barra__pie { font-size: 0.8rem; }
+
+/* Mi sede */
+#carta { display: grid; gap: 1rem; }
+.sedes-lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 0.8rem; }
+.sede-boton { background: #fff; border-radius: 16px; padding: 1rem; text-align: left; display: grid; gap: 0.25rem; color: var(--tinta); border: 2px solid transparent; }
+.sede-boton:hover { border-color: var(--vino); }
+.sede-boton strong { font-family: var(--display); font-weight: 400; font-size: 1.2rem; color: var(--vino); }
+.sede-boton span { font-size: 0.85rem; opacity: 0.8; }
+.sede-boton__estado { font-weight: 700; color: var(--verde); opacity: 1 !important; }
+.sede-boton__estado.is-pausada { color: #b3321f; }
+.sede-estado { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; border-left: 8px solid var(--verde); }
+.sede-estado.is-pausada { border-left-color: #b3321f; background: #fff1ee; }
+.sede-estado p { font-size: 0.9rem; opacity: 0.8; max-width: 60ch; }
+.interruptor--grande { border: 0; font-weight: 700; padding: 0; }
+.sede-form { display: grid; gap: 0.7rem; }
+.sede-form > label { display: grid; gap: 0.25rem; }
+.sede-form > label > span:first-child { font-size: 0.85rem; font-weight: 700; }
+.sede-form input { font: inherit; padding: 0.6rem 0.8rem; border-radius: 10px; border: 2px solid #d8cdb6; background: #fff; width: 100%; }
+.sede-form input:focus { border-color: var(--vino); outline: none; }
+.sede-form .zona { grid-template-columns: 1fr auto; align-items: center; gap: 1rem; padding: 0.5rem 0; border-bottom: 1px dashed #d8cdb6; }
+.zona small { display: block; font-weight: 400; opacity: 0.7; font-size: 0.8rem; }
+.zona__precio { display: flex; align-items: center; gap: 0.3rem; font-weight: 700; }
+.zona__precio input { width: 110px; text-align: right; }
+.sede-form__pie { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.sede-form__pie .accion { width: auto; padding-inline: 1.6rem; }
+.interruptor em { font-style: normal; opacity: 0.6; font-size: 0.85rem; margin-left: 0.3rem; }

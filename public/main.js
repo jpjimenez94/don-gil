@@ -65,12 +65,14 @@ function pintarControles() {
   $("#cats").replaceChildren(
     ...menu.categorias.map((c) => pastilla(c.nombre, c.id === cat, () => elegirCategoria(c.id))),
   );
-  $("#menu-sede").textContent = `${sede.nombre} · ${sede.direccion} · ${sede.horario}`;
+  $("#menu-sede").textContent = sede.abierta
+    ? `${sede.nombre} · ${sede.direccion} · ${sede.horario}`
+    : `${sede.nombre} no está recibiendo pedidos en este momento. Escoja otra sede.`;
 }
 
 function tarjetaPlato(producto) {
   const precio = producto.precio[estado.sede.lista];
-  const agotado = estado.menu.agotados?.includes(producto.id);
+  const agotado = !estado.sede.abierta || estado.sede.agotados.includes(producto.id);
   const tarjeta = document.createElement("article");
   tarjeta.className = agotado ? "plato is-agotado" : "plato";
   tarjeta.dataset.producto = producto.id;
@@ -88,7 +90,7 @@ function tarjetaPlato(producto) {
   $(".plato__pedir", tarjeta).addEventListener("click", () => pedir(producto));
   if (agotado) {
     $(".plato__pedir", tarjeta).disabled = true;
-    $(".precio", tarjeta).textContent = "Agotado hoy";
+    $(".precio", tarjeta).textContent = estado.sede.abierta ? "Agotado hoy" : "Sede cerrada";
   }
   return tarjeta;
 }
@@ -107,7 +109,7 @@ function pintarGrilla(animar = true) {
 function pintarAntojos() {
   const pista = $("#antojos-pista");
   pista.querySelectorAll(".antojo").forEach((n) => n.remove());
-  for (const producto of estado.menu.productos.filter((p) => p.destacado && !estado.menu.agotados?.includes(p.id))) {
+  for (const producto of estado.menu.productos.filter((p) => p.destacado && estado.sede.abierta && !estado.sede.agotados.includes(p.id))) {
     const tarjeta = document.createElement("article");
     tarjeta.className = "antojo";
     tarjeta.dataset.producto = producto.id;
@@ -141,7 +143,12 @@ function pintarSedes() {
       $("h3", fila).textContent = s.nombre;
       $(".sede__dir", fila).textContent = s.direccion;
       const tarifas = (s.domicilio ?? []).map((z) => z.precio);
-      $(".sede__hora", fila).textContent = tarifas.length ? `${s.horario} · Domicilio desde ${pesos(Math.min(...tarifas))}` : s.horario;
+      $(".sede__hora", fila).textContent = !s.abierta
+        ? "No está recibiendo pedidos en este momento"
+        : tarifas.length
+          ? `${s.horario} · Domicilio desde ${pesos(Math.min(...tarifas))}`
+          : s.horario;
+      $("button", fila).disabled = !s.abierta;
       $("button", fila).addEventListener("click", () => {
         elegirSede(s.id);
         window.abrirChat?.(`Hola, quiero pedir en la sede ${s.nombre}`);

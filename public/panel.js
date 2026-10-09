@@ -21,12 +21,13 @@ const filtro = $("filtro");
 const botonSonido = $("sonido");
 const dialogo = $("conversacion");
 const dialogoCancelar = $("cancelar");
-let datos = { pedidos: [], avisos: [], agotados: [], analitica: null };
+let datos = { pedidos: [], avisos: [], sedes: [], analitica: null };
 let menu = null;
 let conocidos = null; // números de pedido ya vistos; null hasta la primera carga
 let audio = null;
 let abierta = null; // conversación abierta: { numero } o { aviso }
 let porCancelar = null;
+let avisoGuardado = { texto: "", hasta: 0 }; // confirmación de "Mi sede", visible unos segundos
 
 function recordar(clave, valor) {
   try {
@@ -220,28 +221,81 @@ function pintarInteres() {
   columnas("a-dias", [1, 2, 3, 4, 5, 6, 0].map((d) => a.porDia[d]), dias);
 }
 
-/* ---------- Disponibilidad ---------- */
+/* ---------- Mi sede: información y disponibilidad ---------- */
+
+const sedeElegida = () => datos.sedes.find((s) => s.nombre === filtro.value);
 
 function pintarCarta() {
-  if (!menu) return;
-  $("t-agotados").textContent = datos.agotados.length;
-  $("t-agotados").hidden = datos.agotados.length === 0;
-  $("carta").innerHTML = menu.categorias
-    .map((categoria) => `
-      <section class="tarjeta">
-        <h2>${esc(categoria.nombre)}</h2>
-        ${menu.productos
-          .filter((p) => p.cat === categoria.id)
-          .map((p) => {
-            const agotado = datos.agotados.includes(p.id);
-            return `<label class="interruptor${agotado ? " is-agotado" : ""}">
-              <span>${esc(p.nombre)}${agotado ? " <b>Agotado</b>" : ""}</span>
-              <input type="checkbox" data-producto="${esc(p.id)}" ${agotado ? "" : "checked"} aria-label="${esc(p.nombre)} disponible">
-            </label>`;
-          })
+  if (!menu || !datos.sedes.length) return;
+  const sede = sedeElegida();
+  const pausadas = datos.sedes.filter((s) => !s.abierta).length;
+  const novedades = sede ? sede.agotados.length + (sede.abierta ? 0 : 1) : datos.sedes.reduce((n, s) => n + s.agotados.length, 0) + pausadas;
+  $("t-agotados").textContent = novedades;
+  $("t-agotados").hidden = novedades === 0;
+
+  if (!sede) {
+    $("carta").innerHTML = `
+      <p class="nota">Cada sede maneja su horario, sus tarifas de domicilio y lo que tiene disponible. Escoja una para verla y configurarla.</p>
+      <div class="sedes-lista">
+        ${datos.sedes
+          .map((s) => `
+            <button class="sede-boton" type="button" data-elegir-sede="${esc(s.nombre)}">
+              <strong>${esc(s.nombre)}</strong>
+              <span>${esc(s.horario)}</span>
+              <span class="sede-boton__estado${s.abierta ? "" : " is-pausada"}">${s.abierta ? "Recibiendo pedidos" : "En pausa"}${s.agotados.length ? ` · ${s.agotados.length} agotado${s.agotados.length === 1 ? "" : "s"}` : ""}</span>
+            </button>`)
           .join("")}
-      </section>`)
-    .join("");
+      </div>`;
+    return;
+  }
+
+  const productosDe = (categoria) =>
+    menu.productos
+      .filter((p) => p.cat === categoria.id)
+      .map((p) => {
+        const agotado = sede.agotados.includes(p.id);
+        return `<label class="interruptor${agotado ? " is-agotado" : ""}">
+          <span>${esc(p.nombre)} <em>${pesos(p.precio[sede.lista])}</em>${agotado ? " <b>Agotado</b>" : ""}</span>
+          <input type="checkbox" data-producto="${esc(p.id)}" ${agotado ? "" : "checked"} aria-label="${esc(p.nombre)} disponible">
+        </label>`;
+      })
+      .join("");
+
+  $("carta").innerHTML = `
+    <section class="tarjeta sede-estado${sede.abierta ? "" : " is-pausada"}">
+      <div>
+        <h2>${esc(sede.nombre)}</h2>
+        <p>${sede.abierta ? "Recibiendo pedidos. El asistente y la página la ofrecen normalmente." : "En pausa. El asistente no toma pedidos para esta sede y la página la muestra cerrada."}</p>
+      </div>
+      <label class="interruptor interruptor--grande">
+        <span>${sede.abierta ? "Abierta" : "En pausa"}</span>
+        <input type="checkbox" id="sede-abierta" ${sede.abierta ? "checked" : ""} aria-label="Recibir pedidos">
+      </label>
+    </section>
+
+    <form class="tarjeta sede-form" id="sede-form">
+      <h2>Información de la sede</h2>
+      <label><span>Horario</span><input name="horario" maxlength="140" value="${esc(sede.horario)}"></label>
+      <label><span>Dirección</span><input name="direccion" maxlength="160" value="${esc(sede.direccion)}"></label>
+      <label><span>WhatsApp de la sede</span><input name="whatsapp" inputmode="numeric" maxlength="15" value="${esc(sede.whatsapp ?? "")}" placeholder="Sin número"></label>
+      <h2>Domicilio por zona</h2>
+      ${sede.domicilio
+        .map((z) => `
+          <label class="zona">
+            <span><strong>${esc(z.nombre)}</strong><small>${esc(z.barrios.join(", "))}</small></span>
+            <span class="zona__precio">$<input name="tarifa:${esc(z.id)}" type="number" min="0" max="50000" step="500" value="${z.precio}" aria-label="Tarifa ${esc(z.nombre)}"></span>
+          </label>`)
+        .join("")}
+      <div class="sede-form__pie">
+        <span class="nota" id="sede-guardado" role="status">${Date.now() < avisoGuardado.hasta ? esc(avisoGuardado.texto) : ""}</span>
+        <button class="accion" type="submit">Guardar cambios</button>
+      </div>
+    </form>
+
+    <p class="nota">Apague lo que se acabó en ${esc(sede.nombre)}. El asistente deja de ofrecerlo en esta sede en el siguiente mensaje. Los precios de los productos son los de la carta y no se cambian aquí.</p>
+    <div class="carta">
+      ${menu.categorias.map((c) => `<section class="tarjeta"><h2>${esc(c.nombre)}</h2>${productosDe(c)}</section>`).join("")}
+    </div>`;
 }
 
 /* ---------- Conversación ---------- */
@@ -279,7 +333,7 @@ function abrirConversacion(cual) {
 function pintar(nuevos = new Set()) {
   pintarPedidos(nuevos);
   pintarResumen();
-  // La carta no se repinta mientras alguien la está tocando.
+  // "Mi sede" no se repinta mientras alguien está escribiendo en ella.
   if (!$("carta").contains(document.activeElement)) pintarCarta();
   if (dialogo.open) pintarConversacion();
 }
@@ -334,10 +388,33 @@ document.querySelector("main").addEventListener("click", (evento) => {
   else if (d.numero) enviar({ numero: d.numero, estado: d.estado }, boton);
 });
 
+$("carta").addEventListener("click", (evento) => {
+  const boton = evento.target.closest("button[data-elegir-sede]");
+  if (!boton) return;
+  filtro.value = boton.dataset.elegirSede;
+  filtro.dispatchEvent(new Event("change"));
+});
+
 $("carta").addEventListener("change", async (evento) => {
-  const casilla = evento.target.closest("input[data-producto]");
-  if (!casilla) return;
-  await enviar({ producto: casilla.dataset.producto, agotado: !casilla.checked });
+  const sede = sedeElegida();
+  if (!sede) return;
+  const casilla = evento.target;
+  if (casilla.id === "sede-abierta") await enviar({ sede: sede.id, config: { abierta: casilla.checked } });
+  else if (casilla.dataset.producto) await enviar({ sede: sede.id, producto: casilla.dataset.producto, agotado: !casilla.checked });
+  else return; // los campos del formulario se guardan con el botón
+  pintarCarta();
+});
+
+$("carta").addEventListener("submit", async (evento) => {
+  evento.preventDefault();
+  const sede = sedeElegida();
+  if (!sede) return;
+  const campos = new FormData(evento.target);
+  const tarifas = {};
+  for (const [nombre, valor] of campos) if (nombre.startsWith("tarifa:")) tarifas[nombre.slice(7)] = Number(valor);
+  const guardado = await enviar({ sede: sede.id, config: { horario: campos.get("horario"), direccion: campos.get("direccion"), whatsapp: campos.get("whatsapp"), tarifas } });
+  document.activeElement?.blur();
+  avisoGuardado = { texto: guardado ? "Guardado. El asistente ya usa estos datos." : "No se pudo guardar. Intente de nuevo.", hasta: Date.now() + 8000 };
   pintarCarta();
 });
 

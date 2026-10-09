@@ -28,7 +28,7 @@
   <nav class="pestanas" role="tablist" aria-label="Secciones del panel">
     <button role="tab" aria-selected="true" data-vista="pedidos">Pedidos <span class="cuenta" id="t-pedidos">0</span></button>
     <button role="tab" aria-selected="false" data-vista="resumen">Resumen</button>
-    <button role="tab" aria-selected="false" data-vista="carta">Disponibilidad <span class="cuenta" id="t-agotados" hidden>0</span></button>
+    <button role="tab" aria-selected="false" data-vista="carta">Mi sede <span class="cuenta" id="t-agotados" hidden>0</span></button>
   </nav>
 
   <main>
@@ -107,8 +107,7 @@
 
     <!-- Disponibilidad -->
     <div class="vista" id="vista-carta" hidden>
-      <p class="nota">Apague lo que se acabó. El asistente deja de ofrecerlo en el siguiente mensaje y la página lo muestra como agotado. Aplica para todas las sedes.</p>
-      <div class="carta" id="carta"></div>
+      <div id="carta"></div>
     </div>
   </main>
 

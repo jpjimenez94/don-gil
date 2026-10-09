@@ -1,6 +1,5 @@
-import { store, cambiarEstado, atenderAviso, buscarPedido, buscarAviso, agregarMensajeManual, marcarAgotado, resumenDeEventos, ESTADOS } from "../lib/store.js";
+import { store, cambiarEstado, atenderAviso, buscarPedido, buscarAviso, agregarMensajeManual, marcarAgotado, configurarSede, resumenDeEventos, ESTADOS } from "../lib/store.js";
 import { enviarWhatsApp } from "../lib/whatsapp.js";
-import { menu } from "../lib/agent.js";
 
 // Por WhatsApp se le escribe al cliente; en la demo web el chat lo consulta en /api/estado.
 async function avisarAlCliente(registro, texto) {
@@ -10,23 +9,27 @@ async function avisarAlCliente(registro, texto) {
 }
 
 // Alimenta el panel de sede (celular o tableta).
-// GET: pedidos, avisos y productos agotados.
+// GET: pedidos, avisos, sedes (con su información y disponibilidad) y analítica.
 // POST, una acción por llamada:
 //   { numero, estado, motivo? }   mueve o cancela un pedido y le avisa al cliente
 //   { numero | aviso, mensaje }   la sede le escribe al cliente
 //   { aviso }                     marca un aviso como atendido
-//   { producto, agotado }         marca un producto como agotado o disponible
+//   { sede, producto, agotado }   marca un producto como agotado o disponible en esa sede
+//   { sede, config }              cambia la información de la sede: abierta, horario, direccion, whatsapp, tarifas
 export default async function handler(req, res) {
   if (req.method === "GET") {
-    return res.status(200).json({ pedidos: store.pedidos, avisos: store.avisos, agotados: store.agotados, analitica: resumenDeEventos(), estados: ESTADOS });
+    return res.status(200).json({ pedidos: store.pedidos, avisos: store.avisos, sedes: store.sedes, analitica: resumenDeEventos(), estados: ESTADOS });
   }
   if (req.method !== "POST") return res.status(405).json({ error: "Método no permitido" });
 
-  const { numero, estado, motivo, aviso, mensaje, producto, agotado } = req.body ?? {};
+  const { numero, estado, motivo, aviso, mensaje, producto, agotado, sede, config } = req.body ?? {};
 
   if (producto !== undefined) {
-    if (!menu.productos.some((p) => p.id === producto)) return res.status(400).json({ error: "Producto no válido" });
-    return res.status(200).json({ ok: true, agotados: marcarAgotado(producto, Boolean(agotado)) });
+    return marcarAgotado(String(sede), String(producto), Boolean(agotado)) ? res.status(200).json({ ok: true }) : res.status(400).json({ error: "Sede o producto no válido" });
+  }
+
+  if (config !== undefined) {
+    return configurarSede(String(sede), config) ? res.status(200).json({ ok: true }) : res.status(400).json({ error: "Sede no válida" });
   }
 
   if (mensaje !== undefined) {
