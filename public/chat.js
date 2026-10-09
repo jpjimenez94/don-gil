@@ -69,13 +69,16 @@
     mensajes.scrollTop = mensajes.scrollHeight;
   }
 
-  // Con el número real configurado, los botones llevan al WhatsApp del cliente con el mensaje ya escrito.
-  // El chat de la página es solo para la demostración.
+  // En celular, los botones llevan al WhatsApp del cliente con el mensaje ya escrito: ahí le llegan
+  // los avisos del pedido. En computador se usa el chat de la página.
+  const esCelular = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
   function abrir(mensaje) {
     const numero = window.donGilWhatsApp;
-    if (numero) {
+    if (numero && esCelular) {
+      window.registrarEvento?.("chat_abierto");
       const texto = encodeURIComponent(mensaje || "Hola, quiero hacer un pedido");
-      window.open(`https://wa.me/${numero}?text=${texto}`, "_blank", "noopener");
+      window.location.href = `https://wa.me/${numero}?text=${texto}`;
       return;
     }
     chat.classList.add("is-abierto");

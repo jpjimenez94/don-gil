@@ -6,8 +6,8 @@
     "pago": "Contra entrega",
     "instagram": "https://www.instagram.com/dongilempanaditasybunuelitos/",
     "tiktok": "https://www.tiktok.com/@dongilempanaditas",
-    "whatsapp_pedidos": null,
-    "_nota_whatsapp": "Número único de pedidos con indicativo, solo dígitos (ej. 573001234567). Mientras sea null, los botones abren el chat de demostración de la página; con un número, abren WhatsApp con el mensaje ya escrito.",
+    "whatsapp_pedidos": "14155238886",
+    "_nota_whatsapp": "Número de WhatsApp que atiende el agente, con indicativo y solo dígitos. Hoy es el de pruebas de Twilio (+1 415 523 8886); al pasar a producción se cambia por el de Don Gil. En celular, los botones de pedido abren WhatsApp con el mensaje ya escrito; en computador abren el chat de la página. Con null, siempre abren el chat de la página.",
     "sitio": "https://don-gil-chi.vercel.app",
     "redes": {
       "Instagram": "@dongilempanaditasybunuelitos (instagram.com/dongilempanaditasybunuelitos)",
