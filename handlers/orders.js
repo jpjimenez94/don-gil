@@ -1,5 +1,6 @@
 import { store, cambiarEstado, atenderAviso, buscarPedido, buscarAviso, agregarMensajeManual, marcarAgotado, configurarSede, resumenDeEventos, fijarUnidades, quitarSolicitud, POCAS, ESTADOS } from "../lib/store.js";
 import { enviarWhatsApp } from "../lib/whatsapp.js";
+import { configurarPromo, promoDeHoy, soltarPromo } from "../lib/promo.js";
 
 // Por WhatsApp se le escribe al cliente; en la demo web el chat lo consulta en /api/estado.
 async function avisarAlCliente(registro, texto) {
@@ -20,13 +21,18 @@ async function avisarAlCliente(registro, texto) {
 //   { agente }                    enciende o apaga el asistente para toda la cadena
 //   { sede, producto, unidades }  fija las unidades disponibles (null = no llevar la cuenta)
 //   { quitarSolicitado }          borra un producto de la lista de lo que piden y no hay
+//   { promo }                     configura la promoción de bienvenida (lib/promo.js)
 export default async function handler(req, res) {
   if (req.method === "GET") {
-    return res.status(200).json({ pedidos: store.pedidos, avisos: store.avisos, sedes: store.sedes, agenteActivo: store.agenteActivo, solicitados: store.solicitados, pocas: POCAS, analitica: resumenDeEventos(), estados: ESTADOS });
+    return res.status(200).json({ pedidos: store.pedidos, avisos: store.avisos, sedes: store.sedes, agenteActivo: store.agenteActivo, solicitados: store.solicitados, pocas: POCAS, promo: promoDeHoy(), analitica: resumenDeEventos(), estados: ESTADOS });
   }
   if (req.method !== "POST") return res.status(405).json({ error: "Método no permitido" });
 
   const { numero, estado, motivo, aviso, mensaje, producto, productos, agotado, sede, config } = req.body ?? {};
+
+  if (req.body?.promo && typeof req.body.promo === "object") {
+    return res.status(200).json({ ok: true, promo: configurarPromo(req.body.promo) });
+  }
 
   if (req.body?.unidades !== undefined) {
     return fijarUnidades(String(sede), String(producto), req.body.unidades) ? res.status(200).json({ ok: true }) : res.status(400).json({ error: "Unidades no válidas" });
@@ -68,6 +74,7 @@ export default async function handler(req, res) {
 
   const cambio = cambiarEstado(String(numero), String(estado), motivo, req.body?.devolver !== false);
   if (!cambio) return res.status(400).json({ error: "Pedido o estado no válido" });
+  if (cambio.pedido.estado === "Cancelado") soltarPromo(cambio.pedido);
   if (cambio.texto) await avisarAlCliente(cambio.pedido, cambio.texto);
   return res.status(200).json({ ok: true, avisado: cambio.texto });
 }

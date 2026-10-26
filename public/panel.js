@@ -27,6 +27,7 @@ let conocidos = null; // números de pedido ya vistos; null hasta la primera car
 let audio = null;
 let abierta = null; // conversación abierta: { numero } o { aviso }
 let porCancelar = null;
+let avisoPromo = { texto: "", hasta: 0 };
 const alistados = new Map(); // pedido -> productos ya alistados (chequeo antes de despachar)
 let busquedaProducto = ""; // búsqueda en la lista de productos de una sede
 let avisoGuardado = { texto: "", hasta: 0 }; // confirmación de "Mi sede", visible unos segundos
@@ -94,6 +95,7 @@ function tarjeta(pedido, esNuevo) {
       </div>
       ${pedido.estado === "En preparación" ? listaDeAlistado(pedido) : `<ul>${pedido.lineas.map((l) => `<li><span><b>${l.cantidad}×</b>${esc(l.producto)}</span><span>${pesos(l.subtotal)}</span></li>`).join("")}</ul>`}
       ${pedido.domicilio ? `<p class="dato dato--domi"><span><b>Domicilio:</b> ${esc(pedido.zona)}</span><span>${pesos(pedido.domicilio)}</span></p>` : ""}
+      ${pedido.descuento ? `<p class="dato dato--domi dato--promo"><span><b>${pedido.descuento.tipo === "sorpresa" ? "Descuento sorpresa" : "Bienvenida"}:</b> ${pedido.descuento.pct} %</span><span>-${pesos(pedido.descuento.valor)}</span></p>` : ""}
       <div class="total"><span>${esc(pedido.pago)}</span><span>${pesos(pedido.total)}</span></div>
       <p class="dato"><b>Recibe:</b> ${esc(pedido.nombre)}</p>
       ${pedido.direccion ? `<p class="dato"><b>Dirección:</b> ${esc(pedido.direccion)}</p>` : ""}
@@ -270,6 +272,42 @@ function pintarInteres() {
   columnas("a-dias", [1, 2, 3, 4, 5, 6, 0].map((d) => a.porDia[d]), dias);
 }
 
+/* ---------- Promoción de bienvenida ---------- */
+
+function tarjetaPromo() {
+  const promo = datos.promo;
+  if (!promo) return "";
+  const campo = (nombre, etiqueta, valor, min, max, sufijo) => `
+    <label><span>${etiqueta}</span><span class="promo__campo"><input name="${nombre}" type="number" min="${min}" max="${max}" value="${valor}" inputmode="numeric">${sufijo}</span></label>`;
+  return `
+    <form class="tarjeta promo${promo.activa ? " is-activa" : ""}" id="promo-form">
+      <div class="promo__cabeza">
+        <div>
+          <h2>Promoción de bienvenida</h2>
+          <p class="nota">${promo.activa
+            ? `Activa en los pedidos por ${esc(promo.canal)}. Hoy van ${promo.hoy.primeros} de ${promo.cupo} descuentos de bienvenida y ${promo.hoy.sorpresa} de ${promo.sorpresaTope} sorpresa.`
+            : `Apagada. Al prenderla, el asistente ofrece un descuento en el primer pedido de cada cliente por ${esc(promo.canal)}.`}</p>
+        </div>
+        <label class="interruptor interruptor--grande">
+          <span>${promo.activa ? "Activa" : "Apagada"}</span>
+          <input type="checkbox" name="activa" ${promo.activa ? "checked" : ""} aria-label="Promoción activa">
+        </label>
+      </div>
+      <div class="promo__campos">
+        ${campo("pct", "Descuento de bienvenida", promo.pct, 1, 50, "%")}
+        ${campo("cupo", "Primeros pedidos con descuento, por día", promo.cupo, 0, 500, "pedidos")}
+        ${campo("sorpresaPct", "Descuento sorpresa", promo.sorpresaPct, 0, 70, "%")}
+        ${campo("sorpresaCada", "Sale la sorpresa 1 de cada", promo.sorpresaCada, 1, 100, "pedidos")}
+        ${campo("sorpresaTope", "Máximo de sorpresas por día", promo.sorpresaTope, 0, 50, "")}
+      </div>
+      <p class="nota">Se aplica solo sobre los productos, no sobre el domicilio, y una sola vez por cliente. El sistema calcula el descuento al registrar el pedido. Si la sede cancela el pedido, el cliente recupera su descuento.</p>
+      <div class="sede-form__pie">
+        <span class="nota" role="status">${Date.now() < avisoPromo.hasta ? esc(avisoPromo.texto) : ""}</span>
+        <button class="accion" type="submit">Guardar promoción</button>
+      </div>
+    </form>`;
+}
+
 /* ---------- Mi sede: información y disponibilidad ---------- */
 
 let sedeEnEdicion = null; // id de la sede abierta en la pestaña Sedes; null = lista de todas
@@ -298,6 +336,7 @@ function pintarCarta() {
           <input type="checkbox" id="agente-activo" ${activo ? "checked" : ""} aria-label="Asistente de pedidos encendido">
         </label>
       </section>
+      ${tarjetaPromo()}
       <p class="nota">Toque una sede para ver y cambiar su horario, sus tarifas de domicilio y lo que tiene disponible.</p>
       <div class="sedes-lista">
         ${datos.sedes
@@ -541,6 +580,12 @@ $("fichas").addEventListener("click", (evento) => {
 });
 
 $("carta").addEventListener("change", async (evento) => {
+  if (evento.target.name === "activa" && evento.target.closest("#promo-form")) {
+    await enviar({ promo: { activa: evento.target.checked } });
+    avisoPromo = { texto: evento.target.checked ? "Promoción activada." : "Promoción apagada.", hasta: Date.now() + 8000 };
+    pintarCarta();
+    return;
+  }
   if (evento.target.id === "agente-activo") {
     await enviar({ agente: evento.target.checked });
     pintarCarta();
@@ -564,6 +609,16 @@ $("carta").addEventListener("change", async (evento) => {
 
 $("carta").addEventListener("submit", async (evento) => {
   evento.preventDefault();
+  if (evento.target.id === "promo-form") {
+    const campos = new FormData(evento.target);
+    const promo = { activa: campos.get("activa") === "on" };
+    for (const nombre of ["pct", "cupo", "sorpresaPct", "sorpresaCada", "sorpresaTope"]) promo[nombre] = Number(campos.get(nombre));
+    const guardado = await enviar({ promo });
+    avisoPromo = { texto: guardado ? "Promoción guardada." : "No se pudo guardar. Intente de nuevo.", hasta: Date.now() + 8000 };
+    document.activeElement?.blur();
+    pintarCarta();
+    return;
+  }
   const sede = sedeElegida();
   if (!sede) return;
   const campos = new FormData(evento.target);

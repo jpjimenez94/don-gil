@@ -263,3 +263,14 @@ h2 { font-family: var(--display); font-weight: 400; font-size: 1.2rem; color: va
 .solicitado .nota { grid-column: 1 / -1; font-size: 0.8rem; }
 .solicitado__veces { font-weight: 700; color: var(--naranja); }
 .cancelar__devolver { display: flex; gap: 0.5rem; align-items: center; font-size: 0.9rem; margin-top: 0.3rem; }
+
+/* Promoción de bienvenida */
+.promo { display: grid; gap: 0.8rem; border-left: 8px solid #cfc5b0; }
+.promo.is-activa { border-left-color: var(--naranja); }
+.promo__cabeza { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.promo__cabeza .nota { max-width: 62ch; }
+.promo__campos { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.7rem; }
+.promo__campos label { display: grid; gap: 0.25rem; font-size: 0.85rem; font-weight: 700; }
+.promo__campo { display: flex; align-items: center; gap: 0.4rem; font-weight: 500; }
+.promo__campo input { width: 90px; font: inherit; padding: 0.5rem 0.7rem; border-radius: 10px; border: 2px solid #d8cdb6; text-align: right; }
+.dato--promo { color: var(--verde); font-weight: 700; }
