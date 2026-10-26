@@ -40,6 +40,8 @@
         <div class="cifra cifra--ventas"><strong id="c-ventas">$0</strong><span>Vendido en pedidos</span></div>
       </section>
 
+      <section class="tarjeta pocas" id="pocas" hidden aria-live="polite"></section>
+
       <section class="avisos" id="avisos-seccion" hidden>
         <h2>Avisos para el equipo <span class="cuenta" id="n-avisos">0</span></h2>
         <div class="avisos__lista" id="avisos"></div>
@@ -89,6 +91,12 @@
         <section class="tarjeta"><h2>Por dónde llegan</h2><div class="barras" id="r-canal"></div></section>
       </div>
       <p class="nota">Las ventas salen de los pedidos del panel y respetan el filtro de sede. No cuentan los cancelados.</p>
+
+      <section class="tarjeta">
+        <h2>Lo que piden y no está en la carta</h2>
+        <p class="nota">El asistente anota lo que los clientes piden y Don Gil no maneja. Sirve para decidir qué agregar al menú.</p>
+        <div id="solicitados"></div>
+      </section>
 
       <h2 class="separador">Qué miran en la página</h2>
       <section class="cifras" aria-label="Embudo de la página">
@@ -142,6 +150,7 @@
         <option>la sede ya cerró</option>
         <option>el cliente pidió cancelarlo</option>
       </select>
+      <label class="cancelar__devolver"><input type="checkbox" id="cancelar-devolver" checked> Devolver las unidades a la disponibilidad de la sede</label>
       <div class="cancelar__botones">
         <button type="button" class="accion accion--suave" id="cancelar-no">Volver</button>
         <button type="submit" class="accion accion--peligro">Cancelar pedido</button>

@@ -231,3 +231,35 @@ h2 { font-family: var(--display); font-weight: 400; font-size: 1.2rem; color: va
 .consumo__pista i { display: block; height: 100%; min-width: 4px; border-radius: 999px; background: var(--verde); transition: width 0.5s ease; }
 .consumo.is-alerta { border: 2px solid #b3321f; }
 .consumo.is-alerta .consumo__pista i { background: #b3321f; }
+
+/* Lista de chequeo antes de despachar */
+.alistar { border-top: 1px dashed #d8cdb6; padding-top: 0.4rem; display: grid; gap: 0.1rem; }
+.alistar__cabeza { display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; font-weight: 700; color: var(--vino); }
+.alistar__item { display: grid; grid-template-columns: auto 1fr auto; gap: 0.6rem; align-items: center; padding: 0.45rem 0.3rem; border-radius: 10px; cursor: pointer; }
+.alistar__item:hover { background: rgba(91, 29, 20, 0.05); }
+.alistar__item input { width: 22px; height: 22px; accent-color: var(--verde); }
+.alistar__item b { font-family: var(--display); font-weight: 400; color: var(--naranja); margin-right: 0.3rem; }
+.alistar__item.is-hecho span:nth-child(2) { text-decoration: line-through; opacity: 0.6; }
+
+/* Pocas unidades y productos de la sede */
+.pocas { border-left: 8px solid var(--naranja); display: grid; gap: 0.2rem; }
+.pocas strong { color: var(--vino); }
+.buscar { width: 100%; margin-top: 0.7rem; font: inherit; padding: 0.65rem 0.9rem; border-radius: 999px; border: 2px solid #d8cdb6; background: #fff; }
+.buscar:focus { border-color: var(--vino); outline: none; }
+.producto-fila { display: grid; grid-template-columns: 1fr auto auto; gap: 0.6rem; align-items: center; padding: 0.5rem 0; border-bottom: 1px dashed #d8cdb6; }
+.producto-fila[hidden] { display: none; }
+.producto-fila:last-child { border-bottom: 0; }
+.producto-fila.is-agotado .producto-fila__nombre { opacity: 0.6; }
+.producto-fila__nombre em { font-style: normal; opacity: 0.6; font-size: 0.85rem; margin-left: 0.2rem; }
+.producto-fila__nombre b { font-size: 0.72rem; background: #d6452f; color: #fff; border-radius: 999px; padding: 0.05rem 0.5rem; margin-left: 0.3rem; }
+.producto-fila__nombre b.is-pocas { background: var(--naranja); }
+.producto-fila__unidades { display: flex; align-items: center; gap: 0.25rem; font-size: 0.78rem; opacity: 0.8; }
+.producto-fila__unidades input { width: 78px; font: inherit; padding: 0.35rem 0.5rem; border-radius: 8px; border: 2px solid #d8cdb6; text-align: right; }
+.interruptor--solo { border: 0; padding: 0; }
+.carta > .tarjeta[hidden] { display: none; }
+
+/* Lo que piden y no hay */
+.solicitado { display: grid; grid-template-columns: 1fr auto auto; gap: 0.2rem 0.8rem; align-items: baseline; padding: 0.55rem 0; border-bottom: 1px dashed #d8cdb6; }
+.solicitado .nota { grid-column: 1 / -1; font-size: 0.8rem; }
+.solicitado__veces { font-weight: 700; color: var(--naranja); }
+.cancelar__devolver { display: flex; gap: 0.5rem; align-items: center; font-size: 0.9rem; margin-top: 0.3rem; }

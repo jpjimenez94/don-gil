@@ -21,12 +21,14 @@ const filtro = $("filtro");
 const botonSonido = $("sonido");
 const dialogo = $("conversacion");
 const dialogoCancelar = $("cancelar");
-let datos = { pedidos: [], avisos: [], sedes: [], agenteActivo: true, analitica: null };
+let datos = { pedidos: [], avisos: [], sedes: [], agenteActivo: true, solicitados: [], pocas: 5, analitica: null };
 let menu = null;
 let conocidos = null; // números de pedido ya vistos; null hasta la primera carga
 let audio = null;
 let abierta = null; // conversación abierta: { numero } o { aviso }
 let porCancelar = null;
+const alistados = new Map(); // pedido -> productos ya alistados (chequeo antes de despachar)
+let busquedaProducto = ""; // búsqueda en la lista de productos de una sede
 let avisoGuardado = { texto: "", hasta: 0 }; // confirmación de "Mi sede", visible unos segundos
 
 function haceCuanto(iso) {
@@ -55,6 +57,26 @@ const delaSede = (lista) => lista.filter((x) => !filtro.value || x.sede === filt
 
 /* ---------- Pedidos ---------- */
 
+// Antes de despachar o entregar, la sede marca cada producto del pedido: evita pedidos equivocados.
+const marcados = (pedido) => alistados.get(pedido.numero) ?? new Set();
+const faltaAlistar = (pedido) => pedido.estado === "En preparación" && marcados(pedido).size < pedido.lineas.length;
+
+function listaDeAlistado(pedido) {
+  const hechos = marcados(pedido);
+  return `
+    <div class="alistar">
+      <div class="alistar__cabeza"><span>Alistar: ${hechos.size} de ${pedido.lineas.length}</span><button class="enlace" type="button" data-alistar-todos="${esc(pedido.numero)}">Marcar todos</button></div>
+      ${pedido.lineas
+        .map((l, i) => `
+          <label class="alistar__item${hechos.has(i) ? " is-hecho" : ""}">
+            <input type="checkbox" data-alistar="${esc(pedido.numero)}" data-linea="${i}" ${hechos.has(i) ? "checked" : ""}>
+            <span><b>${l.cantidad}×</b>${esc(l.producto)}</span><span>${pesos(l.subtotal)}</span>
+          </label>`)
+        .join("")}
+    </div>`;
+  aplicarBusqueda();
+}
+
 function tarjeta(pedido, esNuevo) {
   const paso = SIGUIENTE[pedido.estado](pedido);
   const demorado = pedido.estado === "Nuevo" && Date.now() - new Date(pedido.creado) > MINUTOS_DEMORA * 60000;
@@ -70,7 +92,7 @@ function tarjeta(pedido, esNuevo) {
         <span class="chip">${esc(pedido.sede)}</span>
         <span class="chip">${esc(pedido.canal)}</span>
       </div>
-      <ul>${pedido.lineas.map((l) => `<li><span><b>${l.cantidad}×</b>${esc(l.producto)}</span><span>${pesos(l.subtotal)}</span></li>`).join("")}</ul>
+      ${pedido.estado === "En preparación" ? listaDeAlistado(pedido) : `<ul>${pedido.lineas.map((l) => `<li><span><b>${l.cantidad}×</b>${esc(l.producto)}</span><span>${pesos(l.subtotal)}</span></li>`).join("")}</ul>`}
       ${pedido.domicilio ? `<p class="dato dato--domi"><span><b>Domicilio:</b> ${esc(pedido.zona)}</span><span>${pesos(pedido.domicilio)}</span></p>` : ""}
       <div class="total"><span>${esc(pedido.pago)}</span><span>${pesos(pedido.total)}</span></div>
       <p class="dato"><b>Recibe:</b> ${esc(pedido.nombre)}</p>
@@ -80,7 +102,7 @@ function tarjeta(pedido, esNuevo) {
         <button class="enlace" type="button" data-ver="${esc(pedido.numero)}">Conversación (${pedido.conversacion?.length ?? 0})</button>
         <button class="enlace enlace--peligro" type="button" data-cancelar="${esc(pedido.numero)}">Cancelar</button>
       </div>
-      <button class="accion ${paso.clase}" type="button" data-numero="${esc(pedido.numero)}" data-estado="${esc(paso.estado)}">${paso.texto}</button>
+      <button class="accion ${paso.clase}" type="button" data-numero="${esc(pedido.numero)}" data-estado="${esc(paso.estado)}" ${faltaAlistar(pedido) ? "disabled title=\"Marque primero todo lo que va en el pedido\"" : ""}>${faltaAlistar(pedido) ? "Aliste todo para despachar" : paso.texto}</button>
     </article>`;
 }
 
@@ -94,6 +116,13 @@ function pintarPedidos(nuevos) {
     $(columna).innerHTML = lista.map((p) => tarjeta(p, nuevos.has(p.numero))).join("") || `<p class="vacio">Nada por aquí.</p>`;
     $(CONTADORES[estado]).textContent = lista.length;
   }
+
+  const nombreDe = (id) => menu?.productos.find((x) => x.id === id)?.nombre ?? id;
+  const pocas = datos.sedes
+    .filter((s) => !filtro.value || s.nombre === filtro.value)
+    .flatMap((s) => Object.entries(s.unidades ?? {}).filter(([, n]) => n > 0 && n <= (datos.pocas ?? 5)).map(([id, n]) => `${nombreDe(id)} en ${s.nombre}: ${n}`));
+  $("pocas").hidden = pocas.length === 0;
+  $("pocas").innerHTML = pocas.length ? `<strong>Quedan pocas unidades</strong><span>${pocas.map(esc).join(" · ")}</span>` : "";
 
   const cerrados = pedidos.filter((p) => CERRADOS.includes(p.estado));
   $("n-cerrados").textContent = cerrados.length;
@@ -169,6 +198,21 @@ function pintarResumen() {
   barras("r-entrega", agrupar(pedidos, (p) => (p.entrega === "domicilio" ? "Domicilio" : "Recoger"), () => 1), unidades);
   barras("r-canal", agrupar(pedidos, (p) => p.canal, () => 1), unidades);
   pintarInteres();
+  pintarSolicitados();
+}
+
+function pintarSolicitados() {
+  const lista = [...(datos.solicitados ?? [])].sort((a, b) => b.veces - a.veces);
+  $("solicitados").innerHTML =
+    lista
+      .map((s) => `
+        <div class="solicitado">
+          <strong>${esc(s.producto)}</strong>
+          <span class="solicitado__veces">${s.veces} ${s.veces === 1 ? "vez" : "veces"}</span>
+          <span class="nota">${s.sedes.length ? esc(s.sedes.join(", ")) + " · " : ""}${esc(s.canales.join(", "))} · última ${hora(s.ultimo)}</span>
+          <button class="enlace enlace--peligro" type="button" data-quitar-solicitado="${esc(s.clave)}">Quitar</button>
+        </div>`)
+      .join("") || `<p class="vacio">Todavía nadie ha pedido algo fuera de la carta.</p>`;
 }
 
 /* ---------- Interés en la página y horarios ---------- */
@@ -282,10 +326,16 @@ function pintarCarta() {
       .filter((p) => p.cat === categoria.id)
       .map((p) => {
         const agotado = sede.agotados.includes(p.id);
-        return `<label class="interruptor${agotado ? " is-agotado" : ""}">
-          <span>${esc(p.nombre)} <em>${pesos(p.precio[sede.lista])}</em>${agotado ? " <b>Agotado</b>" : ""}</span>
-          <input type="checkbox" data-producto="${esc(p.id)}" ${agotado ? "" : "checked"} aria-label="${esc(p.nombre)} disponible">
-        </label>`;
+        const unidades = sede.unidades?.[p.id];
+        const pocas = unidades !== undefined && unidades > 0 && unidades <= (datos.pocas ?? 5);
+        return `<div class="producto-fila${agotado ? " is-agotado" : ""}" data-nombre="${esc(p.nombre.toLowerCase())}">
+          <span class="producto-fila__nombre">${esc(p.nombre)} <em>${pesos(p.precio[sede.lista])}</em>${agotado ? " <b>Agotado</b>" : pocas ? ` <b class="is-pocas">Quedan ${unidades}</b>` : ""}</span>
+          <label class="producto-fila__unidades" title="Unidades disponibles hoy. Vacío: no se lleva la cuenta">
+            <input type="number" min="0" step="1" inputmode="numeric" data-unidades="${esc(p.id)}" value="${unidades ?? ""}" placeholder="Sin contar" aria-label="Unidades de ${esc(p.nombre)}">
+            <span>uds</span>
+          </label>
+          <label class="interruptor interruptor--solo"><input type="checkbox" data-producto="${esc(p.id)}" ${agotado ? "" : "checked"} aria-label="${esc(p.nombre)} disponible"></label>
+        </div>`;
       })
       .join("");
 
@@ -321,7 +371,11 @@ function pintarCarta() {
       </div>
     </form>
 
-    <p class="nota">Apague lo que se acabó en ${esc(sede.nombre)}: un producto, o la lista completa con el interruptor de su título. El asistente deja de ofrecerlo en esta sede en el siguiente mensaje. Los precios son los de la carta y no se cambian aquí.</p>
+    <section class="tarjeta">
+      <h2>Disponibilidad de productos</h2>
+      <p class="nota">Apague lo que se acabó, o la lista completa con el interruptor de su título. Si escribe las unidades que hay, se descuentan solas cuando un pedido entra en preparación y el producto se agota al llegar a 0. Vacío significa que no se lleva la cuenta. Los precios son los de la carta.</p>
+      <input class="buscar" id="buscar-producto" type="search" placeholder="Buscar producto" value="${esc(busquedaProducto)}" aria-label="Buscar producto">
+    </section>
     <div class="carta">
       ${menu.categorias
         .map((c) => {
@@ -337,6 +391,14 @@ function pintarCarta() {
         })
         .join("")}
     </div>`;
+}
+
+function aplicarBusqueda() {
+  const texto = busquedaProducto.trim().toLowerCase();
+  for (const fila of document.querySelectorAll("#carta .producto-fila")) fila.hidden = Boolean(texto) && !fila.dataset.nombre.includes(texto);
+  for (const seccion of document.querySelectorAll("#carta .carta > .tarjeta")) {
+    seccion.hidden = Boolean(texto) && !seccion.querySelector(".producto-fila:not([hidden])");
+  }
 }
 
 /* ---------- Conversación ---------- */
@@ -419,6 +481,16 @@ document.querySelector("main").addEventListener("click", (evento) => {
   const boton = evento.target.closest("button");
   if (!boton) return;
   const d = boton.dataset;
+  if (d.alistarTodos) {
+    const pedido = datos.pedidos.find((x) => x.numero === d.alistarTodos);
+    if (pedido) alistados.set(pedido.numero, new Set(pedido.lineas.map((_, i) => i)));
+    pintar();
+    return;
+  }
+  if (d.quitarSolicitado) {
+    enviar({ quitarSolicitado: d.quitarSolicitado }, boton);
+    return;
+  }
   if (d.ver) abrirConversacion({ numero: d.ver });
   else if (d.verAviso) abrirConversacion({ aviso: d.verAviso });
   else if (d.cancelar) {
@@ -427,6 +499,23 @@ document.querySelector("main").addEventListener("click", (evento) => {
     dialogoCancelar.showModal();
   } else if (d.aviso) enviar({ aviso: d.aviso }, boton);
   else if (d.numero) enviar({ numero: d.numero, estado: d.estado }, boton);
+});
+
+document.querySelector("main").addEventListener("change", (evento) => {
+  const casilla = evento.target.closest("input[data-alistar]");
+  if (!casilla) return;
+  const hechos = new Set(alistados.get(casilla.dataset.alistar) ?? []);
+  const linea = Number(casilla.dataset.linea);
+  if (casilla.checked) hechos.add(linea);
+  else hechos.delete(linea);
+  alistados.set(casilla.dataset.alistar, hechos);
+  pintar();
+});
+
+$("carta").addEventListener("input", (evento) => {
+  if (evento.target.id !== "buscar-producto") return;
+  busquedaProducto = evento.target.value;
+  aplicarBusqueda();
 });
 
 $("carta").addEventListener("click", (evento) => {
@@ -461,7 +550,10 @@ $("carta").addEventListener("change", async (evento) => {
   if (!sede) return;
   const casilla = evento.target;
   if (casilla.id === "sede-abierta") await enviar({ sede: sede.id, config: { abierta: casilla.checked } });
-  else if (casilla.dataset.producto) await enviar({ sede: sede.id, producto: casilla.dataset.producto, agotado: !casilla.checked });
+  else if (casilla.dataset.unidades) {
+    const valor = casilla.value.trim();
+    await enviar({ sede: sede.id, producto: casilla.dataset.unidades, unidades: valor === "" ? null : Number(valor) });
+  } else if (casilla.dataset.producto) await enviar({ sede: sede.id, producto: casilla.dataset.producto, agotado: !casilla.checked });
   else if (casilla.dataset.categoria) {
     const productos = menu.productos.filter((p) => p.cat === casilla.dataset.categoria).map((p) => p.id);
     await enviar({ sede: sede.id, productos, agotado: !casilla.checked });
@@ -499,7 +591,7 @@ dialogo.addEventListener("close", () => (abierta = null));
 
 $("cancelar-no").addEventListener("click", () => dialogoCancelar.close());
 $("cancelar-form").addEventListener("submit", () => {
-  if (porCancelar) enviar({ numero: porCancelar, estado: "Cancelado", motivo: $("cancelar-motivo").value });
+  if (porCancelar) enviar({ numero: porCancelar, estado: "Cancelado", motivo: $("cancelar-motivo").value, devolver: $("cancelar-devolver").checked });
   porCancelar = null;
 });
 
