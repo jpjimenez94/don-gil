@@ -24,10 +24,16 @@
   let ocupado = false;
   mensajes.setAttribute("data-lenis-prevent", "");
 
+  const conNegrilla = (texto) =>
+    String(texto)
+      .replace(/[&<>"]/g, (x) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[x])
+      .replace(/\*\*?([^*\n]+)\*\*?/g, "<b>$1</b>");
+
   function burbujaMensaje(texto, clase) {
     const nodo = document.createElement("div");
     nodo.className = `msg ${clase}`;
-    nodo.textContent = texto;
+    // *texto* sale en negrilla, como en WhatsApp.
+    nodo.innerHTML = conNegrilla(texto);
     mensajes.append(nodo);
     mensajes.scrollTop = mensajes.scrollHeight;
     return nodo;
@@ -46,7 +52,12 @@
   // Una persona no contesta al instante ni manda todo en un solo bloque:
   // cada párrafo sale como un mensaje aparte, tras una pausa proporcional a su largo.
   async function escribirComoPersona(texto, yaEsperado = 0) {
-    const partes = texto.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+    // El resumen y la confirmación del pedido van en un solo bloque (igual que en lib/parrafos.js).
+    const partes = [];
+    for (const p of texto.split(/\n\s*\n/).map((x) => x.trim()).filter(Boolean)) {
+      if (partes.length && /^(•|📍|👤|💵|🏠|\*?Total|Le llevamos|Lo reclama)/u.test(p)) partes[partes.length - 1] += "\n" + p;
+      else partes.push(p);
+    }
     for (const [i, parte] of partes.entries()) {
       const pausa = Math.min(2600, 500 + parte.length * 22) - (i === 0 ? yaEsperado : 0);
       if (pausa > 0) {

@@ -1,3 +1,4 @@
+import { enMensajes } from "../lib/parrafos.js";
 import { atenderMensaje } from "../lib/conversacion.js";
 
 // Webhook de WhatsApp por Twilio (entorno de pruebas o número propio).
@@ -14,10 +15,10 @@ export default async function handler(req, res) {
 
   const respuesta = texto?.trim()
     ? await atenderMensaje(cliente, texto)
-    : "Mijito, por acá solo le entiendo texto. Escríbame qué se le antoja y con gusto.";
+    : "Qué pena, por acá solo le entiendo texto. Escríbame qué se le antoja y con gusto.";
 
   // Cada párrafo sale como un mensaje aparte, como escribiría una persona.
-  const mensajes = respuesta.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+  const mensajes = enMensajes(respuesta);
   res.setHeader("Content-Type", "text/xml; charset=utf-8");
   return res.status(200).send(`<?xml version="1.0" encoding="UTF-8"?><Response>${mensajes.map((m) => `<Message>${xml(m)}</Message>`).join("")}</Response>`);
 }

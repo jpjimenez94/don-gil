@@ -18,7 +18,7 @@ export default async function handler(req, res) {
   const respuesta =
     mensaje.type === "text"
       ? await atenderMensaje(telefono, mensaje.text.body)
-      : "Mijito, por acá solo le entiendo texto. Escríbame qué se le antoja y con gusto.";
+      : "Qué pena, por acá solo le entiendo texto. Escríbame qué se le antoja y con gusto.";
   await enviarWhatsApp(telefono, respuesta);
   return res.status(200).send("ok");
 }

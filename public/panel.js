@@ -123,7 +123,7 @@ function desgloseDeCobro(pedido) {
   return `
     <div class="cobro">
       ${filas.map(([concepto, detalle, valor, clase]) => `<div class="cobro__fila ${clase}"><span><b>${concepto}</b><small>${detalle}</small></span><span>${valor}</span></div>`).join("")}
-      <div class="cobro__fila cobro__total"><span>Total a cobrar<small>${cuenta}</small></span><span>${pesos(pedido.total)}</span></div>
+      <div class="cobro__fila cobro__total"><span>Total a cobrar${cuenta.includes(" ") ? `<small>${cuenta}</small>` : ""}</span><span>${pesos(pedido.total)}</span></div>
       <div class="cobro__pago">${esc(pedido.pago)} en efectivo · ${cobro}</div>
     </div>`;
 }
