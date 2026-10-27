@@ -161,17 +161,17 @@
 
   // Cuando la sede mueve el pedido en el panel o le escribe al cliente, el mensaje llega aquí.
   async function consultarEstados() {
-    if ((!misPedidos.size && !misAvisos.size) || ocupado) return;
+    if (!historial.length || ocupado) return;
     try {
-      const consulta = new URLSearchParams({ numeros: [...misPedidos.keys()].join(","), avisos: [...misAvisos].join(",") });
-      const { pedidos, avisos } = await fetch(`/api/estado?${consulta}`).then((r) => r.json());
+      const consulta = new URLSearchParams({ numeros: [...misPedidos.keys()].join(","), avisos: [...misAvisos].join(","), chat: `web:${visitante}` });
+      const { pedidos, avisos, chat } = await fetch(`/api/estado?${consulta}`).then((r) => r.json());
       for (const pedido of pedidos) {
         if (misPedidos.get(pedido.numero) !== pedido.estado && pedido.mensaje) {
           misPedidos.set(pedido.numero, pedido.estado);
           await mostrarDeLaSede(pedido.mensaje);
         }
       }
-      const conManuales = [...pedidos.map((p) => [p.numero, p.manuales]), ...avisos.map((a) => [a.id, a.manuales])];
+      const conManuales = [...pedidos.map((p) => [p.numero, p.manuales]), ...avisos.map((a) => [a.id, a.manuales]), ...(chat ? [["chat", chat.manuales]] : [])];
       for (const [clave, manuales] of conManuales) {
         for (const texto of manuales.slice(manualesVistos.get(clave) ?? 0)) await mostrarDeLaSede(texto);
         manualesVistos.set(clave, manuales.length);

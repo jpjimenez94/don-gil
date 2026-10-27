@@ -1,4 +1,4 @@
-import { store, cambiarEstado, atenderAviso, buscarPedido, buscarAviso, agregarMensajeManual, marcarAgotado, configurarSede, resumenDeEventos, fijarUnidades, quitarSolicitud, POCAS, ESTADOS } from "../lib/store.js";
+import { store, cambiarEstado, atenderAviso, buscarPedido, buscarAviso, agregarMensajeManual, marcarAgotado, configurarSede, resumenDeEventos, fijarUnidades, quitarSolicitud, escribirEnChat, POCAS, ESTADOS } from "../lib/store.js";
 import { enviarWhatsApp } from "../lib/whatsapp.js";
 import { configurarPromo, promoDeHoy, soltarPromo } from "../lib/promo.js";
 
@@ -22,13 +22,24 @@ async function avisarAlCliente(registro, texto) {
 //   { sede, producto, unidades }  fija las unidades disponibles (null = no llevar la cuenta)
 //   { quitarSolicitado }          borra un producto de la lista de lo que piden y no hay
 //   { promo }                     configura la promoción de bienvenida (lib/promo.js)
+//   { chat, mensaje }             la sede le escribe a un cliente desde Conversaciones
 export default async function handler(req, res) {
   if (req.method === "GET") {
-    return res.status(200).json({ pedidos: store.pedidos, avisos: store.avisos, sedes: store.sedes, agenteActivo: store.agenteActivo, solicitados: store.solicitados, pocas: POCAS, promo: promoDeHoy(), analitica: resumenDeEventos(), estados: ESTADOS });
+    return res.status(200).json({ pedidos: store.pedidos, avisos: store.avisos, sedes: store.sedes, agenteActivo: store.agenteActivo, solicitados: store.solicitados, pocas: POCAS, promo: promoDeHoy(), chats: [...store.chats.values()].sort((a, b) => String(b.actualizado).localeCompare(String(a.actualizado))), analitica: resumenDeEventos(), estados: ESTADOS });
   }
   if (req.method !== "POST") return res.status(405).json({ error: "Método no permitido" });
 
   const { numero, estado, motivo, aviso, mensaje, producto, productos, agotado, sede, config } = req.body ?? {};
+
+  if (req.body?.chat !== undefined) {
+    const escrito = String(mensaje ?? "").trim() ? escribirEnChat(String(req.body.chat), String(mensaje).trim()) : null;
+    if (!escrito) return res.status(400).json({ error: "Conversación o mensaje no válido" });
+    if (escrito.chat.canal === "WhatsApp") {
+      await enviarWhatsApp(escrito.chat.clave, escrito.mensaje.content);
+      store.conversaciones.get(escrito.chat.clave)?.push({ role: "assistant", content: escrito.mensaje.content });
+    }
+    return res.status(200).json({ ok: true });
+  }
 
   if (req.body?.promo && typeof req.body.promo === "object") {
     return res.status(200).json({ ok: true, promo: configurarPromo(req.body.promo) });

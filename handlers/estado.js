@@ -1,4 +1,4 @@
-import { buscarPedido, buscarAviso, mensajeDeEstado } from "../lib/store.js";
+import { store, buscarPedido, buscarAviso, mensajeDeEstado } from "../lib/store.js";
 
 const lista = (valor) => String(valor ?? "").split(",").filter(Boolean).slice(0, 10);
 const manuales = (registro) => registro.conversacion.filter((m) => m.manual).map((m) => m.content);
@@ -14,5 +14,6 @@ export default function handler(req, res) {
     .map(buscarAviso)
     .filter(Boolean)
     .map((a) => ({ id: a.id, manuales: manuales(a) }));
-  return res.status(200).json({ pedidos, avisos });
+  const chat = req.query?.chat ? store.chats.get(String(req.query.chat)) : null;
+  return res.status(200).json({ pedidos, avisos, chat: chat ? { manuales: chat.manuales } : null });
 }

@@ -274,3 +274,116 @@ h2 { font-family: var(--display); font-weight: 400; font-size: 1.2rem; color: va
 .promo__campo { display: flex; align-items: center; gap: 0.4rem; font-weight: 500; }
 .promo__campo input { width: 90px; font: inherit; padding: 0.5rem 0.7rem; border-radius: 10px; border: 2px solid #d8cdb6; text-align: right; }
 .dato--promo { color: var(--verde); font-weight: 700; }
+
+/* =========================================================
+   Menú lateral como el de Sauko: fijo en computador, hamburguesa en celular
+   ========================================================= */
+.panel { --alto-barra: 68px; --ancho-menu: 248px; min-height: 100vh; }
+.barra { min-height: var(--alto-barra); flex-wrap: nowrap; z-index: 20; }
+.barra__titulo { flex: 1; min-width: 0; }
+.seccion-actual { display: none; font-family: var(--display); font-size: 1.15rem; }
+.menu-boton { display: none; width: 44px; height: 44px; border-radius: 12px; place-items: center; color: var(--crema); background: rgba(255, 255, 255, 0.12); flex: none; }
+.menu-boton svg { width: 24px; height: 24px; }
+
+.pestanas { flex-direction: column; gap: 0.2rem; padding: 1rem 0.8rem; margin: 0; max-width: none; background: #fff; border-right: 1px solid rgba(91, 29, 20, 0.1); overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; }
+.pestanas button[data-vista] { display: flex; align-items: center; gap: 0.75rem; width: 100%; padding: 0.7rem 0.9rem; border-radius: 14px; text-align: left; font-size: 0.97rem; background: none; color: var(--vino); transition: background 0.15s ease, color 0.15s ease; }
+.pestanas button[data-vista]:hover { background: var(--crema); }
+.pestanas button[data-vista][aria-selected="true"] { background: var(--vino); color: var(--crema); box-shadow: 0 8px 20px -10px rgba(58, 17, 11, 0.7); }
+.pestanas button[data-vista] svg { width: 21px; height: 21px; flex: none; }
+.pestanas button[data-vista] .cuenta { margin-left: auto; }
+.pestanas__titulo { font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: #9b8a7a; padding: 0.7rem 0.9rem 0.2rem; font-weight: 700; }
+.pestanas__pie { margin-top: auto; padding: 1rem 0.2rem 0.2rem; border-top: 1px solid rgba(91, 29, 20, 0.08); }
+.pestanas__pie .accion { display: block; text-align: center; text-decoration: none; }
+.menu-fondo { display: none; }
+main { max-width: 1400px; width: 100%; margin: 0; align-content: start; }
+.fichas { padding: 0; margin: 0; max-width: none; }
+.fichas[hidden] { display: none; }
+.fichas--dentro { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+
+@media (min-width: 901px) {
+  .panel { display: grid; grid-template-columns: var(--ancho-menu) minmax(0, 1fr); grid-template-rows: auto 1fr; align-items: start; }
+  .panel > .barra { grid-column: 1 / -1; }
+  .panel > .pestanas { grid-column: 1; position: sticky; top: var(--alto-barra); height: calc(100vh - var(--alto-barra)); display: flex; }
+  .panel > main { grid-column: 2; }
+}
+@media (max-width: 900px) {
+  .menu-boton { display: inline-grid; }
+  .barra h1, .barra__logo { display: none; }
+  .seccion-actual { display: block; }
+  .vivo #vivo-texto { display: none; }
+  .pestanas { position: fixed; z-index: 60; top: 0; bottom: 0; left: 0; width: min(84vw, 300px); display: flex; transform: translateX(-104%); transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 20px 0 60px -20px rgba(0, 0, 0, 0.4); }
+  .panel.menu-abierto .pestanas { transform: none; }
+  .panel.menu-abierto .menu-fondo { display: block; position: fixed; inset: 0; z-index: 55; background: rgba(42, 18, 13, 0.45); border: 0; }
+}
+
+/* =========================================================
+   Conversaciones: el WhatsApp de Don Gil dentro del panel
+   ========================================================= */
+.wa { display: grid; grid-template-columns: minmax(260px, 360px) minmax(0, 1fr); height: calc(100vh - var(--alto-barra) - 3.5rem); min-height: 520px; background: #fff; border-radius: 22px; overflow: hidden; box-shadow: 0 24px 60px -30px rgba(58, 17, 11, 0.45), 0 0 0 1px rgba(91, 29, 20, 0.08); }
+.wa-lista { display: flex; flex-direction: column; min-width: 0; min-height: 0; border-right: 1px solid #e9edef; }
+.wa-lista__cabeza { padding: 1rem; background: var(--vino); color: #fff; display: grid; gap: 0.7rem; }
+.wa-lista__cabeza h2 { color: #fff; font-size: 1.3rem; }
+.wa-lista__cabeza h2 small { font-family: "DM Sans", sans-serif; font-weight: 700; font-size: 0.75rem; background: rgba(255, 255, 255, 0.18); border-radius: 999px; padding: 0.15rem 0.55rem; }
+.buscar--claro { margin: 0; border: 0; background: rgba(255, 255, 255, 0.95); }
+.wa-filtros { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+.wa-filtros .ficha { background: rgba(255, 255, 255, 0.14); color: #fff; border-color: transparent; font-size: 0.8rem; padding: 0.3rem 0.7rem; }
+.wa-filtros .ficha[aria-pressed="true"] { background: var(--amarillo); color: var(--vino); }
+.wa-lista__items { overflow-y: auto; flex: 1; }
+.wa-lista__items .vacio { padding: 2rem 1rem; }
+.wa-item { display: flex; gap: 0.7rem; align-items: center; width: 100%; padding: 0.75rem 1rem; background: #fff; text-align: left; border-bottom: 1px solid #f0f2f5; }
+.wa-item:hover { background: #f5f6f6; }
+.wa-item.is-abierto { background: #fff6dc; }
+.wa-item__avatar { width: 44px; height: 44px; flex: none; border-radius: 50%; display: grid; place-items: center; background: var(--amarillo-claro); color: var(--vino); font-family: var(--display); font-size: 1.2rem; }
+.wa-item__avatar.is-wa { background: #d9fdd3; color: #075e54; }
+.wa-item__texto { flex: 1; min-width: 0; display: grid; gap: 0.15rem; }
+.wa-item__fila { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; min-width: 0; }
+.wa-item__fila strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wa-item__fila small { font-size: 0.75rem; opacity: 0.6; white-space: nowrap; }
+.wa-item__ultimo { font-size: 0.85rem; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wa-item__canal { font-size: 0.72rem; font-weight: 700; opacity: 0.55; white-space: nowrap; }
+.wa-chat { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: #efeae2; }
+.wa-chat__vacio { margin: auto; padding: 2rem; }
+.wa-chat__cabeza { display: flex; align-items: center; gap: 0.7rem; padding: 0.7rem 1rem; background: #f0f2f5; border-bottom: 1px solid #e0e0e0; }
+.wa-chat__cabeza > div { flex: 1; min-width: 0; }
+.wa-chat__cabeza strong { display: block; }
+.wa-chat__cabeza small { font-size: 0.8rem; opacity: 0.7; }
+.wa-volver { display: none; font-size: 1.4rem; text-decoration: none; }
+.wa-atendido { width: auto; padding: 0.45rem 0.9rem; font-size: 0.85rem; margin: 0; }
+.wa-chat__mensajes { flex: 1; overflow-y: auto; padding: 1rem 1.2rem; display: flex; flex-direction: column; gap: 0.45rem; }
+.wa-chat__form { display: flex; gap: 0.5rem; padding: 0.6rem 0.8rem; background: #f0f2f5; }
+.wa-chat__form input { flex: 1; min-width: 0; border: 0; border-radius: 999px; padding: 0.75rem 1rem; font: inherit; background: #fff; }
+.wa-chat__form button { padding: 0 1.2rem; border-radius: 999px; background: #075e54; color: #fff; font-weight: 700; }
+@media (max-width: 900px) {
+  .wa { grid-template-columns: 1fr; height: calc(100vh - var(--alto-barra) - 2rem); }
+  #vista-conversaciones.con-chat .wa-lista { display: none; }
+  #vista-conversaciones:not(.con-chat) .wa-chat { display: none; }
+  .wa-volver { display: inline-block; }
+}
+
+/* =========================================================
+   Clientes
+   ========================================================= */
+.clientes-cabeza { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.clientes-acciones { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
+.clientes-acciones .buscar { margin: 0; width: min(280px, 100%); }
+.clientes-acciones .accion { width: auto; margin: 0; padding: 0.65rem 1.1rem; }
+.tabla-envoltura { overflow-x: auto; padding: 0.4rem; }
+.tabla { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.tabla th { text-align: left; font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: #9b8a7a; padding: 0.6rem 0.7rem; border-bottom: 2px solid var(--crema); white-space: nowrap; }
+.tabla td { padding: 0.65rem 0.7rem; border-bottom: 1px dashed #e7dcc6; vertical-align: top; }
+.tabla td strong { display: block; color: var(--vino); }
+.tabla td small { font-size: 0.8rem; opacity: 0.7; }
+.tabla tr:hover td { background: #fffaf0; }
+
+/* Detalle del cobro en cada pedido */
+.unitario { display: block; font-size: 0.75rem; opacity: 0.6; margin-left: 1.6rem; }
+.cobro { display: grid; gap: 0.25rem; padding: 0.6rem 0.7rem; border-radius: 12px; background: var(--crema); font-size: 0.86rem; }
+.cobro__fila { display: flex; justify-content: space-between; gap: 0.8rem; }
+.cobro__fila span:last-child { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cobro__fila.is-promo { color: var(--verde); font-weight: 700; }
+.cobro__fila.is-suave { opacity: 0.6; }
+.cobro__total { border-top: 1px dashed #c9b99d; padding-top: 0.35rem; margin-top: 0.15rem; font-weight: 700; font-size: 1.05rem; color: var(--vino); }
+.cobro__pago { font-size: 0.8rem; opacity: 0.85; }
+
+/* Lo oculto no se muestra aunque la clase le dé display */
+[hidden] { display: none !important; }

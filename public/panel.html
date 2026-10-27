@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Don Gil · Panel de sede</title>
+  <title>Don Gil · Panel</title>
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" href="img/logo.webp">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,25 +12,40 @@
   <link rel="stylesheet" href="panel.css">
 </head>
 <body>
+<div class="panel" id="panel">
   <header class="barra">
+    <button class="menu-boton" id="menu-boton" type="button" aria-label="Abrir el menú" aria-controls="menu-panel" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
     <a class="barra__logo" href="/" aria-label="Ir a la página"><img src="img/logo.webp" alt="Don Gil" width="48" height="48"></a>
     <div class="barra__titulo">
-      <h1>Panel de sede</h1>
-      <span class="vivo" id="vivo"><i></i><span id="vivo-texto">En vivo</span></span>
+      <h1>Panel de Don Gil</h1>
+      <span class="seccion-actual" id="seccion-actual">Pedidos</span>
     </div>
-    <select id="filtro" hidden aria-hidden="true"><option value="">Todas</option></select>
+    <span class="vivo" id="vivo"><i></i><span id="vivo-texto">En vivo</span></span>
     <button class="sonido" id="sonido" type="button" aria-pressed="false">Sonido: apagado</button>
   </header>
 
-  <nav class="pestanas" role="tablist" aria-label="Secciones del panel">
-    <button role="tab" aria-selected="true" data-vista="pedidos">Pedidos <span class="cuenta" id="t-pedidos">0</span></button>
-    <button role="tab" aria-selected="false" data-vista="resumen">Resumen</button>
-    <button role="tab" aria-selected="false" data-vista="carta">Sedes <span class="cuenta" id="t-agotados" hidden>0</span></button>
+  <nav class="pestanas" id="menu-panel" role="tablist" aria-label="Secciones del panel">
+    <p class="pestanas__titulo">Operación</p>
+    <button role="tab" aria-selected="true" data-vista="pedidos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7h12l-1 13H7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>Pedidos <span class="cuenta" id="t-pedidos">0</span></button>
+    <button role="tab" aria-selected="false" data-vista="conversaciones"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19l1.4-4A8 8 0 1 1 9 18.6z"/><path d="M9 10h6M9 13.5h4"/></svg>Conversaciones <span class="cuenta" id="t-convs" hidden>0</span></button>
+    <button role="tab" aria-selected="false" data-vista="clientes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="9" cy="11" r="2.5"/><path d="M5.5 17a3.5 3.5 0 0 1 7 0M15 9.5h3.5M15 13h3.5"/></svg>Clientes</button>
+    <button role="tab" aria-selected="false" data-vista="resumen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Resumen</button>
+    <p class="pestanas__titulo">Carta</p>
+    <button role="tab" aria-selected="false" data-vista="disponibilidad"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7M12 11v10"/></svg>Disponibilidad <span class="cuenta" id="t-agotados" hidden>0</span></button>
+    <button role="tab" aria-selected="false" data-vista="solicitados"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg>Solicitados <span class="cuenta" id="t-solicitados" hidden>0</span></button>
+    <p class="pestanas__titulo">Configuración</p>
+    <button role="tab" aria-selected="false" data-vista="sedes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Sedes <span class="cuenta" id="t-sedes" hidden>0</span></button>
+    <button role="tab" aria-selected="false" data-vista="ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>Asistente y promoción <span class="cuenta" id="t-ajustes" hidden>!</span></button>
+    <div class="pestanas__pie">
+      <a class="accion accion--suave" href="/">Ver la página</a>
+    </div>
   </nav>
-
-  <div class="fichas" id="fichas" role="group" aria-label="Ver una sede o todas"></div>
+  <button class="menu-fondo" id="menu-fondo" type="button" aria-label="Cerrar el menú"></button>
 
   <main>
+    <select id="filtro" hidden aria-hidden="true"><option value="">Todas</option></select>
+    <div class="fichas" id="fichas" role="group" aria-label="Ver una sede o todas"></div>
+
     <!-- Pedidos -->
     <div class="vista" id="vista-pedidos">
       <section class="cifras" aria-label="Resumen rápido">
@@ -68,7 +83,55 @@
       </details>
     </div>
 
-    <!-- Resumen para el dueño -->
+    <!-- Conversaciones -->
+    <div class="vista" id="vista-conversaciones" hidden>
+      <div class="wa">
+        <section class="wa-lista">
+          <div class="wa-lista__cabeza">
+            <h2>Conversaciones <small id="conv-total">0</small></h2>
+            <input class="buscar buscar--claro" id="buscar-chat" type="search" placeholder="Buscar por nombre, número o mensaje" aria-label="Buscar conversación">
+            <div class="wa-filtros" role="group" aria-label="Filtrar conversaciones">
+              <button type="button" class="ficha" data-filtro-chat="todas" aria-pressed="true">Todas</button>
+              <button type="button" class="ficha" data-filtro-chat="atencion" aria-pressed="false">Necesitan atención</button>
+              <button type="button" class="ficha" data-filtro-chat="WhatsApp" aria-pressed="false">WhatsApp</button>
+              <button type="button" class="ficha" data-filtro-chat="Demo web" aria-pressed="false">Página</button>
+            </div>
+          </div>
+          <div class="wa-lista__items" id="lista-chats"></div>
+        </section>
+        <section class="wa-chat" id="wa-chat">
+          <p class="vacio wa-chat__vacio">Escoja una conversación para leerla y responder.</p>
+        </section>
+      </div>
+    </div>
+
+    <!-- Clientes -->
+    <div class="vista" id="vista-clientes" hidden>
+      <section class="tarjeta clientes-cabeza">
+        <div>
+          <h2>Clientes</h2>
+          <p class="nota">Cada persona que ha pedido, con lo que ha comprado. En WhatsApp se identifica por su número; en la página, por la visita.</p>
+        </div>
+        <div class="clientes-acciones">
+          <input class="buscar" id="buscar-cliente" type="search" placeholder="Buscar cliente" aria-label="Buscar cliente">
+          <button class="accion accion--suave" type="button" id="exportar-clientes">Descargar CSV</button>
+        </div>
+      </section>
+      <section class="cifras" aria-label="Clientes en cifras">
+        <div class="cifra"><strong id="cl-total">0</strong><span>Clientes</span></div>
+        <div class="cifra"><strong id="cl-repiten">0</strong><span>Han pedido más de una vez</span></div>
+        <div class="cifra"><strong id="cl-whatsapp">0</strong><span>Por WhatsApp</span></div>
+        <div class="cifra cifra--ventas"><strong id="cl-promedio">$0</strong><span>Compra promedio por cliente</span></div>
+      </section>
+      <div class="tarjeta tabla-envoltura">
+        <table class="tabla" id="tabla-clientes">
+          <thead><tr><th>Cliente</th><th>Canal</th><th>Pedidos</th><th>Total comprado</th><th>Último pedido</th><th>Sede habitual</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Resumen -->
     <div class="vista" id="vista-resumen" hidden>
       <section class="tarjeta consumo" id="consumo" aria-label="Conversaciones del plan">
         <div class="consumo__cabeza">
@@ -91,12 +154,6 @@
         <section class="tarjeta"><h2>Por dónde llegan</h2><div class="barras" id="r-canal"></div></section>
       </div>
       <p class="nota">Las ventas salen de los pedidos del panel y respetan el filtro de sede. No cuentan los cancelados.</p>
-
-      <section class="tarjeta">
-        <h2>Lo que piden y no está en la carta</h2>
-        <p class="nota">El asistente anota lo que los clientes piden y Don Gil no maneja. Sirve para decidir qué agregar al menú.</p>
-        <div id="solicitados"></div>
-      </section>
 
       <h2 class="separador">Qué miran en la página</h2>
       <section class="cifras" aria-label="Embudo de la página">
@@ -121,10 +178,30 @@
     </div>
 
     <!-- Disponibilidad -->
-    <div class="vista" id="vista-carta" hidden>
-      <div id="carta"></div>
+    <div class="vista" id="vista-disponibilidad" hidden>
+      <div id="disponibilidad"></div>
+    </div>
+
+    <!-- Solicitados -->
+    <div class="vista" id="vista-solicitados" hidden>
+      <section class="tarjeta">
+        <h2>Lo que piden y no está en la carta</h2>
+        <p class="nota">El asistente anota lo que los clientes piden y Don Gil no maneja, con cuántas veces y por dónde. Sirve para decidir qué agregar al menú.</p>
+        <div id="solicitados"></div>
+      </section>
+    </div>
+
+    <!-- Sedes -->
+    <div class="vista" id="vista-sedes" hidden>
+      <div id="sedes"></div>
+    </div>
+
+    <!-- Asistente y promoción -->
+    <div class="vista" id="vista-ajustes" hidden>
+      <div id="ajustes"></div>
     </div>
   </main>
+</div>
 
   <dialog class="conv" id="conversacion" aria-labelledby="conv-titulo">
     <header class="conv__cabeza">

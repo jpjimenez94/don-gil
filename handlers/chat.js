@@ -1,5 +1,5 @@
 import { responder } from "../lib/agent.js";
-import { store, buscarPedido, registrarEvento, registrarConversacion, mensajeAgenteApagado } from "../lib/store.js";
+import { store, buscarPedido, registrarEvento, registrarConversacion, mensajeAgenteApagado, anotarChat, claveDeChat } from "../lib/store.js";
 
 const CANAL = "Demo web";
 
@@ -37,6 +37,7 @@ export default async function handler(req, res) {
     }
     if (pedido) pedido.conversacion = conversacion;
     if (aviso) aviso.conversacion = conversacion;
+    anotarChat(claveDeChat(CANAL, cliente), CANAL, conversacion);
 
     return res.status(200).json({ respuesta: texto, pedido, aviso });
   } catch (error) {
