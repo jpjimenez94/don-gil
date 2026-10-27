@@ -1,5 +1,6 @@
-import { store, cambiarEstado, atenderAviso, buscarPedido, buscarAviso, agregarMensajeManual, marcarAgotado, configurarSede, resumenDeEventos, fijarUnidades, quitarSolicitud, escribirEnChat, POCAS, ESTADOS, marcarEnCaja } from "../lib/store.js";
+import { store, cambiarEstado, atenderAviso, buscarPedido, buscarAviso, agregarMensajeManual, marcarAgotado, configurarSede, resumenDeEventos, fijarUnidades, quitarSolicitud, escribirEnChat, POCAS, ESTADOS, marcarEnCaja, tomarChat, soltarChat, PAUSA_AL_ESCRIBIR_MIN, PAUSA_AL_TOMAR_MIN } from "../lib/store.js";
 import { enviarWhatsApp } from "../lib/whatsapp.js";
+import { retomarChat } from "../lib/conversacion.js";
 import { configurarPromo, promoDeHoy, soltarPromo } from "../lib/promo.js";
 
 // Por WhatsApp se le escribe al cliente; en la demo web el chat lo consulta en /api/estado.
@@ -24,6 +25,8 @@ async function avisarAlCliente(registro, texto) {
 //   { promo }                     configura la promoción de bienvenida (lib/promo.js)
 //   { chat, mensaje }             la sede le escribe a un cliente desde Conversaciones
 //   { numero, enCaja: true }      el efectivo de un pedido entregado ya llegó a la caja
+//   { chat, tomar: true }         la sede toma el chat: el asistente no le contesta a ese cliente por 2 horas
+//   { chat, soltar: true }        se lo devuelve a la IA, que contesta si el cliente quedó esperando
 export default async function handler(req, res) {
   if (req.method === "GET") {
     return res.status(200).json({ pedidos: store.pedidos, avisos: store.avisos, sedes: store.sedes, agenteActivo: store.agenteActivo, solicitados: store.solicitados, pocas: POCAS, promo: promoDeHoy(), chats: [...store.chats.values()].sort((a, b) => String(b.actualizado).localeCompare(String(a.actualizado))), analitica: resumenDeEventos(), estados: ESTADOS });
@@ -36,6 +39,20 @@ export default async function handler(req, res) {
     return marcarEnCaja(String(numero)) ? res.status(200).json({ ok: true }) : res.status(400).json({ error: "Ese pedido no está entregado" });
   }
 
+  if (req.body?.chat !== undefined && req.body?.tomar) {
+    return tomarChat(String(req.body.chat), PAUSA_AL_TOMAR_MIN) ? res.status(200).json({ ok: true }) : res.status(400).json({ error: "Conversación no válida" });
+  }
+  if (req.body?.chat !== undefined && req.body?.soltar) {
+    if (!soltarChat(String(req.body.chat))) return res.status(400).json({ error: "Conversación no válida" });
+    let retomo = false;
+    try {
+      retomo = Boolean(await retomarChat(String(req.body.chat)));
+    } catch (error) {
+      console.error("retomar chat:", error);
+    }
+    return res.status(200).json({ ok: true, retomo });
+  }
+
   if (req.body?.chat !== undefined) {
     const escrito = String(mensaje ?? "").trim() ? escribirEnChat(String(req.body.chat), String(mensaje).trim()) : null;
     if (!escrito) return res.status(400).json({ error: "Conversación o mensaje no válido" });
@@ -43,6 +60,8 @@ export default async function handler(req, res) {
       await enviarWhatsApp(escrito.chat.clave, escrito.mensaje.content);
       store.conversaciones.get(escrito.chat.clave)?.push({ role: "assistant", content: escrito.mensaje.content });
     }
+    // Mientras la sede atiende, el asistente se calla un rato en ese chat.
+    tomarChat(escrito.chat.clave, PAUSA_AL_ESCRIBIR_MIN, true);
     return res.status(200).json({ ok: true });
   }
 

@@ -151,7 +151,7 @@ function tarjeta(pedido, esNuevo) {
       </div>
       <div class="chips">
         <span class="chip${pedido.entrega === "domicilio" ? " chip--domi" : ""}">${pedido.entrega === "domicilio" ? "Domicilio" : "Recoger"}</span>
-        <span class="chip">${esc(pedido.hora)}</span>
+        <span class="chip${/^programado/i.test(pedido.hora) ? " chip--programado" : ""}">${esc(pedido.hora)}</span>
         <span class="chip">${esc(pedido.sede)}</span>
         <span class="chip">${esc(pedido.canal)}</span>
       </div>
@@ -268,12 +268,15 @@ function pintarListaDeChats() {
             <span class="wa-item__avatar${chat.canal === "WhatsApp" ? " is-wa" : ""}">${esc(inicial(chat))}</span>
             <span class="wa-item__texto">
               <span class="wa-item__fila"><strong>${esc(nombreDeChat(chat))}</strong><small>${chat.actualizado ? haceCuanto(chat.actualizado) : ""}</small></span>
-              <span class="wa-item__fila"><span class="wa-item__ultimo">${ultimo ? `${ultimo.role === "user" ? "" : "Don Gil: "}${esc(ultimo.content.slice(0, 70))}` : ""}</span>${atencion ? '<span class="pildora is-pausada">Atender</span>' : `<span class="wa-item__canal">${chat.canal === "WhatsApp" ? "WhatsApp" : "Página"}</span>`}</span>
+              <span class="wa-item__fila"><span class="wa-item__ultimo">${ultimo ? `${ultimo.role === "user" ? "" : "Don Gil: "}${esc(ultimo.content.slice(0, 70))}` : ""}</span>${atencion ? '<span class="pildora is-pausada">Atender</span>' : tomado(chat) ? '<span class="pildora">Sede</span>' : `<span class="wa-item__canal">${chat.canal === "WhatsApp" ? "WhatsApp" : "Página"}</span>`}</span>
             </span>
           </button>`;
       })
       .join("") || `<p class="vacio">${datos.chats.length ? "Ninguna conversación coincide con la búsqueda." : "Todavía no hay conversaciones. Aparecen apenas un cliente le escribe al asistente."}</p>`;
 }
+
+// La sede tomó el chat y el asistente no le contesta a ese cliente.
+const tomado = (chat) => Boolean(chat.tomadoHasta && new Date(chat.tomadoHasta) > Date.now());
 
 function pintarChatAbierto() {
   const chat = datos.chats.find((c) => c.clave === chatAbierto);
@@ -290,7 +293,7 @@ function pintarChatAbierto() {
       <header class="wa-chat__cabeza" id="wa-cabeza"></header>
       <div class="wa-chat__mensajes" id="wa-mensajes"></div>
       <form class="wa-chat__form" id="wa-form">
-        <input id="wa-entrada" type="text" autocomplete="off" maxlength="500" placeholder="Escribirle al cliente como la sede" aria-label="Mensaje para el cliente">
+        <input id="wa-entrada" type="text" autocomplete="off" maxlength="500" placeholder="Escribirle al cliente (la IA se pausa 30 min en este chat)" aria-label="Mensaje para el cliente">
         <button type="submit">Enviar</button>
       </form>`;
   }
@@ -303,7 +306,10 @@ function pintarChatAbierto() {
       <strong>${esc(nombreDeChat(chat))}</strong>
       <small>${chat.canal === "WhatsApp" ? `WhatsApp · ${esc(chat.clave.replace(/^whatsapp:/, ""))}` : "Chat de la página"}${pedidos.length ? ` · Pedidos: ${pedidos.map((p) => `${esc(p.corto)} ${esc(p.estado.toLowerCase())}`).join(", ")}` : ""}</small>
     </div>
-    ${avisos.map((a) => `<button class="accion accion--suave wa-atendido" type="button" data-aviso="${esc(a.id)}">Marcar atendido</button>`).join("")}`;
+    ${avisos.map((a) => `<button class="accion accion--suave wa-atendido" type="button" data-aviso="${esc(a.id)}">Marcar atendido</button>`).join("")}
+    ${tomado(chat)
+      ? `<span class="wa-tomado">🙋 Lo atiende la sede hasta las ${hora(chat.tomadoHasta)}</span><button class="accion wa-atendido" type="button" data-soltar-chat="${esc(chat.clave)}">Devolver a la IA</button>`
+      : `<button class="accion accion--suave wa-atendido" type="button" data-tomar-chat="${esc(chat.clave)}">Tomar el chat</button>`}`;
   const caja = $("wa-mensajes");
   const alFinal = caja.scrollHeight - caja.scrollTop - caja.clientHeight < 60;
   const etiqueta = (m) => (m.manual ? "<small>Escrito por la sede</small>" : m.automatico ? "<small>Aviso automático</small>" : "");
@@ -814,6 +820,10 @@ document.querySelector("main").addEventListener("click", (evento) => {
     const pedido = datos.pedidos.find((x) => x.numero === d.alistarTodos);
     if (pedido) alistados.set(pedido.numero, new Set(pedido.lineas.map((_, i) => i)));
     pintar();
+  } else if (d.tomarChat) enviar({ chat: d.tomarChat, tomar: true }, boton);
+  else if (d.soltarChat) {
+    boton.textContent = "Devolviendo…";
+    enviar({ chat: d.soltarChat, soltar: true }, boton);
   } else if (d.enCaja) enviar({ numero: d.enCaja, enCaja: true }, boton);
   else if (d.quitarSolicitado) enviar({ quitarSolicitado: d.quitarSolicitado }, boton);
   else if (d.abrirChat) abrirChat(d.abrirChat);

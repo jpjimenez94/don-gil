@@ -403,3 +403,7 @@ main { max-width: 1400px; width: 100%; margin: 0; align-content: start; }
 
 .msg__hora { display: block; text-align: right; font-size: 0.68rem; opacity: 0.55; margin-top: 0.2rem; }
 @media (max-width: 480px) { #seccion-actual { display: none; } }
+
+/* La sede tomó el chat */
+.wa-tomado { font-size: 0.78rem; font-weight: 700; color: #8a2b12; }
+.chip--programado { background: #dbe8ff; color: #1d3f7a; font-weight: 700; }

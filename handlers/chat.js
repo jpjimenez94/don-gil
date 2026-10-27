@@ -1,5 +1,5 @@
 import { responder } from "../lib/agent.js";
-import { store, buscarPedido, registrarEvento, registrarConversacion, mensajeAgenteApagado, anotarChat, claveDeChat } from "../lib/store.js";
+import { store, buscarPedido, registrarEvento, registrarConversacion, mensajeAgenteApagado, anotarChat, claveDeChat, chatTomado } from "../lib/store.js";
 
 const CANAL = "Demo web";
 
@@ -25,6 +25,11 @@ export default async function handler(req, res) {
   const cliente = String(req.body?.cliente || "Visitante").slice(0, 40);
   registrarEvento("mensaje", CANAL);
   registrarConversacion(`web:${cliente}`);
+
+  if (chatTomado(claveDeChat(CANAL, cliente))) {
+    anotarChat(claveDeChat(CANAL, cliente), CANAL, [{ role: "user", content: historial.at(-1).content }]);
+    return res.status(200).json({ respuesta: "", pedido: null, aviso: null, atiendeLaSede: true });
+  }
 
   try {
     const { texto, pedido, aviso } = await responder(historial, { canal: CANAL, cliente });

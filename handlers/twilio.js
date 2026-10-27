@@ -21,5 +21,6 @@ export default async function handler(req, res) {
   // y cada burbuja cuenta. Con TWILIO_PARRAFOS_APARTE=1 cada párrafo sale como un mensaje aparte.
   const mensajes = process.env.TWILIO_PARRAFOS_APARTE === "1" ? enMensajes(respuesta) : [enMensajes(respuesta).join("\n\n")];
   res.setHeader("Content-Type", "text/xml; charset=utf-8");
+  if (!respuesta.trim()) return res.status(200).send('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
   return res.status(200).send(`<?xml version="1.0" encoding="UTF-8"?><Response>${mensajes.map((m) => `<Message>${xml(m)}</Message>`).join("")}</Response>`);
 }

@@ -142,6 +142,11 @@
       });
       const datos = await respuesta.json();
       if (!respuesta.ok) throw new Error(datos.error || "Error");
+      // La sede tomó la conversación: la respuesta llega desde el panel.
+      if (!datos.respuesta) {
+        quitar();
+        return;
+      }
       historial.push({ role: "assistant", content: datos.respuesta });
       const primera = datos.respuesta.split(/\n\s*\n/)[0] ?? "";
       const falta = Math.min(2600, 500 + primera.length * 22) - (Date.now() - inicio);
