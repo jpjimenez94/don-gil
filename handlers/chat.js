@@ -37,7 +37,7 @@ export default async function handler(req, res) {
     }
     if (pedido) pedido.conversacion = conversacion;
     if (aviso) aviso.conversacion = conversacion;
-    anotarChat(claveDeChat(CANAL, cliente), CANAL, conversacion);
+    anotarChat(claveDeChat(CANAL, cliente), CANAL, conversacion.slice(-2));
 
     return res.status(200).json({ respuesta: texto, pedido, aviso });
   } catch (error) {

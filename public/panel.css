@@ -400,3 +400,6 @@ main { max-width: 1400px; width: 100%; margin: 0; align-content: start; }
 
 .caja-pendiente { margin-left: 0.6rem; font-size: 0.8rem; font-weight: 700; color: #8a2b12; }
 .caja-pendiente:empty { display: none; }
+
+.msg__hora { display: block; text-align: right; font-size: 0.68rem; opacity: 0.55; margin-top: 0.2rem; }
+@media (max-width: 480px) { #seccion-actual { display: none; } }

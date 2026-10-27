@@ -308,7 +308,10 @@ function pintarChatAbierto() {
   const alFinal = caja.scrollHeight - caja.scrollTop - caja.clientHeight < 60;
   const etiqueta = (m) => (m.manual ? "<small>Escrito por la sede</small>" : m.automatico ? "<small>Aviso automático</small>" : "");
   const clase = (m) => (m.role === "user" ? "msg--cliente" : m.manual || m.automatico ? "msg--sede" : "msg--agente");
-  caja.innerHTML = chat.mensajes.map((m) => `<div class="msg ${clase(m)}">${etiqueta(m)}${esc(m.content)}</div>`).join("");
+  // *texto* en negrilla, como lo ve el cliente en WhatsApp, y la hora de cada mensaje.
+  const negrilla = (texto) => esc(texto).replace(/\*\*?([^*\n]+)\*\*?/g, "<b>$1</b>");
+  const cuando = (m) => (m.hora ? `<small class="msg__hora">${new Date(m.hora).toLocaleString("es-CO", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</small>` : "");
+  caja.innerHTML = chat.mensajes.map((m) => `<div class="msg ${clase(m)}">${etiqueta(m)}${negrilla(m.content)}${cuando(m)}</div>`).join("");
   if (alFinal) caja.scrollTop = caja.scrollHeight;
 }
 
