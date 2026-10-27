@@ -55,7 +55,7 @@
     // El resumen y la confirmación del pedido van en un solo bloque (igual que en lib/parrafos.js).
     const partes = [];
     for (const p of texto.split(/\n\s*\n/).map((x) => x.trim()).filter(Boolean)) {
-      if (partes.length && /^(•|📍|👤|💵|🏠|\*?Total|Le llevamos|Lo reclama)/u.test(p)) partes[partes.length - 1] += "\n" + p;
+      if (partes.length && /^(•|📍|👤|💵|🏠|\*?Total|Le llevamos|Lo reclama|[1-9]\uFE0F?\u20E3|¿Cuál|¿Le sumo|Me puede responder)/u.test(p)) partes[partes.length - 1] += "\n" + p;
       else partes.push(p);
     }
     for (const [i, parte] of partes.entries()) {
