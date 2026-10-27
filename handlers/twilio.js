@@ -17,8 +17,9 @@ export default async function handler(req, res) {
     ? await atenderMensaje(cliente, texto)
     : "Qué pena, por acá solo le entiendo texto. Escríbame qué se le antoja y con gusto.";
 
-  // Cada párrafo sale como un mensaje aparte, como escribiría una persona.
-  const mensajes = enMensajes(respuesta);
+  // Una sola burbuja por respuesta: la cuenta de prueba de Twilio tiene un tope de mensajes al día
+  // y cada burbuja cuenta. Con TWILIO_PARRAFOS_APARTE=1 cada párrafo sale como un mensaje aparte.
+  const mensajes = process.env.TWILIO_PARRAFOS_APARTE === "1" ? enMensajes(respuesta) : [enMensajes(respuesta).join("\n\n")];
   res.setHeader("Content-Type", "text/xml; charset=utf-8");
   return res.status(200).send(`<?xml version="1.0" encoding="UTF-8"?><Response>${mensajes.map((m) => `<Message>${xml(m)}</Message>`).join("")}</Response>`);
 }
