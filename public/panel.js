@@ -108,20 +108,35 @@ function listaDeAlistado(pedido) {
 // El detalle de lo que se cobra, línea por línea, para que la sede y el repartidor no tengan que sumar.
 function desgloseDeCobro(pedido) {
   const productos = pedido.subtotal ?? pedido.lineas.reduce((s, l) => s + l.subtotal, 0);
-  const unidades = pedido.lineas.reduce((s, l) => s + l.cantidad, 0);
-  const filas = [[`Productos (${unidades} ${unidades === 1 ? "unidad" : "unidades"}, precios de ${esc(pedido.sede)})`, pesos(productos), ""]];
-  if (pedido.descuento) filas.push([`${pedido.descuento.tipo === "sorpresa" ? "Descuento sorpresa" : "Descuento de bienvenida"} (${pedido.descuento.pct} % sobre los productos)`, `-${pesos(pedido.descuento.valor)}`, "is-promo"]);
-  if (pedido.entrega === "domicilio") filas.push([`Domicilio · ${esc(pedido.zona || "zona sin definir")}`, pesos(pedido.domicilio ?? 0), ""]);
-  else filas.push(["Domicilio · recoge en la sede", "$0", "is-suave"]);
-  const cobro = pedido.pagaCon
-    ? `Paga con <b>${pesos(pedido.pagaCon)}</b> · ${pedido.devuelta ? `llevar devuelta de <b>${pesos(pedido.devuelta)}</b>` : "paga justo"}`
-    : pedido.entrega === "domicilio" ? "No se sabe con cuánto paga: pregúntelo antes de despachar" : "Paga al recoger en la sede";
+  const sede = datos.sedes.find((s) => s.nombre === pedido.sede);
+  const zona = sede?.domicilio?.find((z) => z.nombre === pedido.zona);
+  const porque = sede ? (sede.lista === "cc" ? "precios de sede en centro comercial" : "precios de sede de calle") : "precios de la sede";
+  const filas = [[`Productos`, `${porque[0].toUpperCase()+porque.slice(1)} (${esc(pedido.sede)})`, pesos(productos), ""]];
+  if (pedido.descuento) filas.push([pedido.descuento.tipo === "sorpresa" ? "Descuento sorpresa" : "Descuento de bienvenida", `${pedido.descuento.pct} % sobre los productos, no sobre el domicilio`, `−${pesos(pedido.descuento.valor)}`, "is-promo"]);
+  if (pedido.entrega === "domicilio") filas.push([`Domicilio`, zona ? `Tarifa fija de la zona ${esc(zona.nombre)}${zona.barrios?.length ? ` (${esc(zona.barrios.slice(0, 3).join(", "))}…)` : ""}` : `Zona ${esc(pedido.zona || "sin definir")}`, pesos(pedido.domicilio ?? 0), ""]);
+  else filas.push(["Domicilio", "No aplica: el cliente recoge en la sede", "$0", "is-suave"]);
+  const cuenta = [pesos(productos), pedido.descuento ? `− ${pesos(pedido.descuento.valor)}` : "", pedido.entrega === "domicilio" ? `+ ${pesos(pedido.domicilio ?? 0)}` : ""].filter(Boolean).join(" ");
+  let cobro;
+  if (pedido.entrega !== "domicilio") cobro = `Cobrar <b>${pesos(pedido.total)}</b> en la caja al entregar el pedido`;
+  else if (pedido.pagaCon) cobro = `El repartidor cobra <b>${pesos(pedido.total)}</b> · paga con <b>${pesos(pedido.pagaCon)}</b> · ${pedido.devuelta ? `llevar devuelta de <b>${pesos(pedido.devuelta)}</b>` : "paga justo, sin devuelta"}`;
+  else cobro = `<span class="chip chip--alerta">Falta saber con cuánto paga: pregúntelo antes de despachar</span>`;
   return `
     <div class="cobro">
-      ${filas.map(([concepto, valor, clase]) => `<div class="cobro__fila ${clase}"><span>${concepto}</span><span>${valor}</span></div>`).join("")}
-      <div class="cobro__fila cobro__total"><span>Total a cobrar</span><span>${pesos(pedido.total)}</span></div>
+      ${filas.map(([concepto, detalle, valor, clase]) => `<div class="cobro__fila ${clase}"><span><b>${concepto}</b><small>${detalle}</small></span><span>${valor}</span></div>`).join("")}
+      <div class="cobro__fila cobro__total"><span>Total a cobrar<small>${cuenta}</small></span><span>${pesos(pedido.total)}</span></div>
       <div class="cobro__pago">${esc(pedido.pago)} en efectivo · ${cobro}</div>
     </div>`;
+}
+
+// Lo que pasó al cerrar: entregado (y si la plata ya está en caja) o cancelado (cuándo y qué pasó con las unidades).
+function cierreDe(p) {
+  if (p.estado === "Cancelado") {
+    const cuando = p.canceladoEn ? ` · ${hora(p.canceladoEn)}` : "";
+    const unidades = p.unidadesDevueltas === false ? "Las unidades no volvieron a la disponibilidad." : "Las unidades volvieron a la disponibilidad.";
+    return `<small class="cierre cierre--mal">Cancelado${p.motivoCancelacion ? `: ${esc(p.motivoCancelacion)}` : ""}${cuando}. ${unidades}</small>`;
+  }
+  if (p.enCaja) return `<small class="cierre cierre--ok">${pesos(p.total)} en caja · ${hora(p.enCaja)}</small>`;
+  return `<small class="cierre cierre--mal">Efectivo por llevar a caja: <b>${pesos(p.total)}</b> <button class="mini" type="button" data-en-caja="${esc(p.numero)}">Recibido en caja</button></small>`;
 }
 
 function tarjeta(pedido, esNuevo) {
@@ -140,7 +155,7 @@ function tarjeta(pedido, esNuevo) {
         <span class="chip">${esc(pedido.sede)}</span>
         <span class="chip">${esc(pedido.canal)}</span>
       </div>
-      ${pedido.estado === "En preparación" ? listaDeAlistado(pedido) : `<ul>${pedido.lineas.map((l) => `<li><span><b>${l.cantidad}×</b>${esc(l.producto)}${l.cantidad > 1 && l.unitario ? `<small class="unitario">${pesos(l.unitario)} c/u</small>` : ""}</span><span>${pesos(l.subtotal)}</span></li>`).join("")}</ul>`}
+      ${pedido.estado === "En preparación" ? listaDeAlistado(pedido) : `<ul>${pedido.lineas.map((l) => `<li><span><b>${l.cantidad}×</b>${esc(l.producto)}${l.unitario ? `<small class="unitario">${l.cantidad} × ${pesos(l.unitario)}</small>` : ""}</span><span>${pesos(l.subtotal)}</span></li>`).join("")}</ul>`}
       ${desgloseDeCobro(pedido)}
       <p class="dato"><b>Recibe:</b> ${esc(pedido.nombre)}</p>
       ${pedido.direccion ? `<p class="dato"><b>Dirección:</b> ${esc(pedido.direccion)}</p>` : ""}
@@ -172,12 +187,22 @@ function pintarPedidos(nuevos) {
 
   const cerrados = pedidos.filter((p) => CERRADOS.includes(p.estado));
   $("n-cerrados").textContent = cerrados.length;
+  // Plata de domicilios y recogidas entregados que aún no llega a caja: se ve sin abrir la lista.
+  const porCaja = cerrados.filter((p) => p.estado === "Entregado" && !p.enCaja).reduce((s, p) => s + p.total, 0);
+  let avisoCaja = $("caja-pendiente");
+  if (!avisoCaja) {
+    avisoCaja = document.createElement("span");
+    avisoCaja.id = "caja-pendiente";
+    avisoCaja.className = "caja-pendiente";
+    $("n-cerrados").after(avisoCaja);
+  }
+  avisoCaja.textContent = porCaja ? `${pesos(porCaja)} por llevar a caja` : "";
   $("col-cerrados").innerHTML =
     cerrados
       .map((p) => `
         <div class="fila${p.estado === "Cancelado" ? " fila--cancelado" : ""}">
           <button class="enlace" type="button" data-ver="${esc(p.numero)}"><strong>${esc(p.corto)}</strong></button>
-          <span>${esc(p.nombre)} · ${p.lineas.map((l) => `${l.cantidad}× ${esc(l.producto)}`).join(", ")}${p.estado === "Cancelado" ? ` · Cancelado: ${esc(p.motivoCancelacion)}` : ""}</span>
+          <span>${esc(p.nombre)} · ${p.lineas.map((l) => `${l.cantidad}× ${esc(l.producto)}`).join(", ")}${cierreDe(p)}</span>
           <span class="fila__hora">${hora(p.creado)}</span>
           <span>${pesos(p.total)}</span>
         </div>`)
@@ -786,7 +811,8 @@ document.querySelector("main").addEventListener("click", (evento) => {
     const pedido = datos.pedidos.find((x) => x.numero === d.alistarTodos);
     if (pedido) alistados.set(pedido.numero, new Set(pedido.lineas.map((_, i) => i)));
     pintar();
-  } else if (d.quitarSolicitado) enviar({ quitarSolicitado: d.quitarSolicitado }, boton);
+  } else if (d.enCaja) enviar({ numero: d.enCaja, enCaja: true }, boton);
+  else if (d.quitarSolicitado) enviar({ quitarSolicitado: d.quitarSolicitado }, boton);
   else if (d.abrirChat) abrirChat(d.abrirChat);
   else if (d.cerrarChat !== undefined) {
     chatAbierto = null;

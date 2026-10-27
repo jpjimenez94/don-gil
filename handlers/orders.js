@@ -1,4 +1,4 @@
-import { store, cambiarEstado, atenderAviso, buscarPedido, buscarAviso, agregarMensajeManual, marcarAgotado, configurarSede, resumenDeEventos, fijarUnidades, quitarSolicitud, escribirEnChat, POCAS, ESTADOS } from "../lib/store.js";
+import { store, cambiarEstado, atenderAviso, buscarPedido, buscarAviso, agregarMensajeManual, marcarAgotado, configurarSede, resumenDeEventos, fijarUnidades, quitarSolicitud, escribirEnChat, POCAS, ESTADOS, marcarEnCaja } from "../lib/store.js";
 import { enviarWhatsApp } from "../lib/whatsapp.js";
 import { configurarPromo, promoDeHoy, soltarPromo } from "../lib/promo.js";
 
@@ -23,6 +23,7 @@ async function avisarAlCliente(registro, texto) {
 //   { quitarSolicitado }          borra un producto de la lista de lo que piden y no hay
 //   { promo }                     configura la promoción de bienvenida (lib/promo.js)
 //   { chat, mensaje }             la sede le escribe a un cliente desde Conversaciones
+//   { numero, enCaja: true }      el efectivo de un pedido entregado ya llegó a la caja
 export default async function handler(req, res) {
   if (req.method === "GET") {
     return res.status(200).json({ pedidos: store.pedidos, avisos: store.avisos, sedes: store.sedes, agenteActivo: store.agenteActivo, solicitados: store.solicitados, pocas: POCAS, promo: promoDeHoy(), chats: [...store.chats.values()].sort((a, b) => String(b.actualizado).localeCompare(String(a.actualizado))), analitica: resumenDeEventos(), estados: ESTADOS });
@@ -30,6 +31,10 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Método no permitido" });
 
   const { numero, estado, motivo, aviso, mensaje, producto, productos, agotado, sede, config } = req.body ?? {};
+
+  if (req.body?.enCaja) {
+    return marcarEnCaja(String(numero)) ? res.status(200).json({ ok: true }) : res.status(400).json({ error: "Ese pedido no está entregado" });
+  }
 
   if (req.body?.chat !== undefined) {
     const escrito = String(mensaje ?? "").trim() ? escribirEnChat(String(req.body.chat), String(mensaje).trim()) : null;
